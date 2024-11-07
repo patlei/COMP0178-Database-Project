@@ -32,10 +32,11 @@ USE auction;
 CREATE TABLE IF NOT EXISTS `users` (
   `username` varchar(30) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
   `email` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL, -- Increased length from `varchar(30)` to `varchar(50)` to accommodate longer emails.
-  `password` varchar(30) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `password` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
   `average_rating` int(100) UNSIGNED NOT NULL DEFAULT 0,
   `items_sold` int(100) UNSIGNED NOT NULL DEFAULT 0,
   `items_bought` int(100) UNSIGNED NOT NULL DEFAULT 0,
+  `accountType` varchar(30) NOT NULL,
   PRIMARY KEY (`username`) -- Added PRIMARY KEY for `username`.
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 COMMIT;

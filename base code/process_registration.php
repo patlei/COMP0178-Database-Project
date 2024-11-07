@@ -1,8 +1,12 @@
 <?php
-include 'connection.php'; // Include the database connection file
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+include 'connection.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['email'], $_POST['password'], $_POST['passwordConfirmation'], $_POST['accountType'])) {
+    if (isset($_POST['username'], $_POST['email'], $_POST['password'], $_POST['passwordConfirmation'], $_POST['accountType'])) {
+        
+        $username = $_POST['username']; // New field
         $accountType = $_POST['accountType'];
         $email = $_POST['email'];
         $password = $_POST['password'];
@@ -10,7 +14,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Check if passwords match
         if ($password !== $passwordConfirmation) {
-            die("Passwords do not match.");
+            echo "Passwords do not match.";
+            exit();
         }
 
         // Check if the email is already registered with the same account type
@@ -21,17 +26,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $result = $stmt->get_result();
 
         if ($result->num_rows > 0) {
-            echo "You have already registered with this email for the specified account type.";
+            echo "Account already exists";
+            exit();
         } else {
-            // Proceed with registration since the email is unique for the specified account type
-            $sql = "INSERT INTO users (accountType, email, password) VALUES (?, ?, ?)";
+            // Hash the password before storing it in the database
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            $sql = "INSERT INTO users (username, accountType, email, password) VALUES (?, ?, ?, ?)";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("sss", $accountType, $email, $password);
+            $stmt->bind_param("ssss", $username, $accountType, $email, $hashedPassword);
 
             if ($stmt->execute()) {
                 echo "Registration successful!";
             } else {
-                echo "Error: " . $conn->error;
+                echo "Error inserting data: " . $stmt->error;
             }
         }
 
@@ -43,4 +50,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     echo "Invalid request method.";
 }
 
-mysqli_close($conn);
+$conn->close();
