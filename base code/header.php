@@ -1,12 +1,13 @@
 <?php
-  // FIXME: At the moment, I've allowed these values to be set manually.
-  // But eventually, with a database, these should be set automatically
-  // ONLY after the user's login credentials have been verified via a 
-  // database query.
-  session_start();
-  $_SESSION['logged_in'] = false;
-  $_SESSION['account_type'] = 'seller';
+session_start();
+
+// Default session variables if not logged in
+if (!isset($_SESSION['logged_in'])) {
+    $_SESSION['logged_in'] = false; // Ensure this is false by default if the user isn't logged in
+    $_SESSION['account_type'] = 'guest'; // Default to a guest account type, or some default state
+}
 ?>
+
 
 
 <!doctype html>
@@ -77,31 +78,47 @@
 </nav>
 
 <!-- Login modal -->
-<div class="modal fade" id="loginModal">
-  <div class="modal-dialog">
-    <div class="modal-content">
+<div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
 
-      <!-- Modal Header -->
-      <div class="modal-header">
-        <h4 class="modal-title">Login</h4>
-      </div>
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h5 class="modal-title" id="loginModalLabel">Login</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
 
-      <!-- Modal body -->
-      <div class="modal-body">
-        <form method="POST" action="login_result.php">
-          <div class="form-group">
-            <label for="email">Email</label>
-            <input type="text" class="form-control" id="email" placeholder="Email">
-          </div>
-          <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" class="form-control" id="password" placeholder="Password">
-          </div>
-          <button type="submit" class="btn btn-primary form-control">Sign in</button>
-        </form>
-        <div class="text-center">or <a href="register.php">create an account</a></div>
-      </div>
+            <!-- Modal Body: Form to login -->
+            <div class="modal-body">
+                <form method="POST" action="login_result.php">
+                    <!-- Username field -->
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" required>
+                    </div>
 
+                    <!-- Password field -->
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+                    </div>
+
+                    <!-- Submit button -->
+                    <button type="submit" class="btn btn-primary form-control">Sign in</button>
+                </form>
+
+                <!-- Register link -->
+                <div class="text-center mt-3">
+                    Don't have an account? <a href="register.php">Create one</a>
+                </div>
+            </div>
+
+        </div>
     </div>
-  </div>
-</div> <!-- End modal -->
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+

@@ -31,15 +31,12 @@ USE auction;
 
 CREATE TABLE IF NOT EXISTS `users` (
   `username` varchar(30) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
-  `email` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL, -- Increased length from `varchar(30)` to `varchar(50)` to accommodate longer emails.
-  `password` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `email` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,  -- Increased length to accommodate longer emails.
+  `password` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL, -- Increased length to accommodate hashed passwords
   `average_rating` int(100) UNSIGNED NOT NULL DEFAULT 0,
-  `items_sold` int(100) UNSIGNED NOT NULL DEFAULT 0,
-  `items_bought` int(100) UNSIGNED NOT NULL DEFAULT 0,
   `accountType` varchar(30) NOT NULL,
-  PRIMARY KEY (`username`) -- Added PRIMARY KEY for `username`.
+  PRIMARY KEY (`username`)  -- Added PRIMARY KEY for `username`.
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-COMMIT;
 
 -- --------------------------------------------------------
 
@@ -50,49 +47,29 @@ COMMIT;
 CREATE TABLE IF NOT EXISTS `categories` (
   `category_id` int(10) UNSIGNED NOT NULL,
   `categoryName` varchar(30) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `categoryDescription` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL, -- Increased length from `varchar(30)` to `varchar(100)` to allow more description text.
-  PRIMARY KEY (`category_id`) -- Added PRIMARY KEY for `category_id`.
+  PRIMARY KEY (`category_id`)  -- Added PRIMARY KEY for `category_id`.
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `items`
+-- Table structure for table `auction`
 --
 
-CREATE TABLE IF NOT EXISTS `items` (
-  `item_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS `auction` (
+  `auction_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,  -- Primary Key for the auction.
   `item_name` varchar(30) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
-  `item_description` varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL, -- Changed length from `varchar(30)` to `varchar(250)` to allow more detailed descriptions.
+  `item_description` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,  -- Increased length for description.
   `category_id` int(10) UNSIGNED NOT NULL,
-  `username` varchar(30) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
-  PRIMARY KEY (`item_id`), -- Added PRIMARY KEY for `item_id`.
-  FOREIGN KEY (`category_id`) REFERENCES `categories` (`category_id`), -- Added foreign key constraint to link to `categories`.
-  FOREIGN KEY (`username`) REFERENCES `users` (`username`) -- Added foreign key constraint to link to `users`.
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-
-
-
-
--- --------------------------------------------------------
-
---
--- Table structure for table `auctions`
---
-
-CREATE TABLE IF NOT EXISTS `auctions` (
-  `auction_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `item_id` int(10) UNSIGNED NOT NULL,
   `username` varchar(30) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
   `starting_price` int(10) UNSIGNED NOT NULL,
   `reserve_price` int(10) UNSIGNED NOT NULL,
   `start_date` date NOT NULL,
   `end_date` date NOT NULL,
-  `auction_status` ENUM('active', 'closed') NOT NULL, -- Changed data type from TEXT to ENUM.
-  PRIMARY KEY (`auction_id`),  -- Added PRIMARY KEY for the `auction_id`.
-  FOREIGN KEY (`item_id`) REFERENCES `items` (`item_id`), -- Added foreign key constraint to link to `items`.
-  FOREIGN KEY (`username`) REFERENCES `users` (`username`)  -- Added foreign key constraint to link to `users`.
+  `auction_status` ENUM('active', 'closed') NOT NULL,  -- Using ENUM for status.
+  PRIMARY KEY (`auction_id`),  -- PRIMARY KEY for the auction.
+  FOREIGN KEY (`category_id`) REFERENCES `categories` (`category_id`),  -- {FK} to `categories`.
+  FOREIGN KEY (`username`) REFERENCES `users` (`username`)  -- {FK} to `users`.
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -103,32 +80,73 @@ CREATE TABLE IF NOT EXISTS `auctions` (
 
 CREATE TABLE IF NOT EXISTS `bids` (
   `bid_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `auction_id` int(10) UNSIGNED NOT NULL,
+  `auction_id` int(10) UNSIGNED NOT NULL, 
   `username` varchar(30) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
   `bid_amount` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `bid_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,PRIMARY KEY (`bid_id`), -- Added PRIMARY KEY for the `bid_id`.
-  FOREIGN KEY (`auction_id`) REFERENCES `auctions` (`auction_id`), -- Added foreign key constraint to link to `auctions`.
-  FOREIGN KEY (`username`) REFERENCES `users` (`username`) -- Added foreign key constraint to link to `users`.
+  `bid_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`bid_id`),  -- PRIMARY KEY for `bid_id`.
+  FOREIGN KEY (`auction_id`) REFERENCES `auction` (`auction_id`),  -- {FK} to `auction`.
+  FOREIGN KEY (`username`) REFERENCES `users` (`username`)  -- {FK} to `users`.
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `closed auctions`
+-- Table structure for table `closed_auctions`
+--
+-- Tracking the final sale details for auctions that have ended.
 --
 
-CREATE TABLE IF NOT EXISTS `closed auctions` (
+CREATE TABLE IF NOT EXISTS `closed_auctions` (
   `win_id` int(10) UNSIGNED NOT NULL,
-  `auction_id` int(10) UNSIGNED NOT NULL,
-  `bid_id` int(10) UNSIGNED NOT NULL,
+  `auction_id` int(10) UNSIGNED NOT NULL, 
+  `bid_id` int(10) UNSIGNED NOT NULL,  -- Bid that won the auction.
   `seller_rating` int(10) UNSIGNED NOT NULL,
   `buyer_rating` int(10) UNSIGNED NOT NULL,
-  PRIMARY KEY (`win_id`), -- Added PRIMARY KEY for `win_id`.
-  FOREIGN KEY (`auction_id`) REFERENCES `auctions` (`auction_id`), -- Added foreign key constraint to link to `auctions`.
-  FOREIGN KEY (`bid_id`) REFERENCES `bids` (`bid_id`) -- Added foreign key constraint to link to `bids`.
+  PRIMARY KEY (`win_id`),  -- PRIMARY KEY for `win_id`.
+  FOREIGN KEY (`auction_id`) REFERENCES `auction` (`auction_id`),  -- {FK} to `auction`.
+  FOREIGN KEY (`bid_id`) REFERENCES `bids` (`bid_id`)  -- {FK} to `bids`.
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
 
+--
+-- Table structure for table `sales`
+--
+-- This table tracks sales transactions for items sold by users.
+--
+
+CREATE TABLE IF NOT EXISTS `sales` (
+  `sale_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `auction_id` int(10) UNSIGNED NOT NULL, 
+  `seller_username` varchar(30) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,  
+  `buyer_username` varchar(30) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,  
+  `sale_price` int(10) UNSIGNED NOT NULL,  -- Price at which the item was sold.
+  PRIMARY KEY (`sale_id`),  -- PRIMARY KEY for `sales`.
+  FOREIGN KEY (`auction_id`) REFERENCES `auction` (`auction_id`),  -- {FK} to `auction`.
+  FOREIGN KEY (`seller_username`) REFERENCES `users` (`username`),  -- {FK} to `users` (seller).
+  FOREIGN KEY (`buyer_username`) REFERENCES `users` (`username`)  -- {FK} to `users` (buyer).
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `purchases`
+--
+-- This table tracks purchases made by users.
+--
+
+CREATE TABLE IF NOT EXISTS `purchases` (
+  `purchase_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `auction_id` int(10) UNSIGNED NOT NULL,
+  `buyer_username` varchar(30) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,  -- Buyer's username.
+  `purchase_price` int(10) UNSIGNED NOT NULL,  -- Price at which the item was purchased.
+  PRIMARY KEY (`purchase_id`),  -- PRIMARY KEY for `purchases`.
+  FOREIGN KEY (`auction_id`) REFERENCES `auction` (`auction_id`),  -- {FK} to `auction`.
+  FOREIGN KEY (`buyer_username`) REFERENCES `users` (`username`)  -- {FK} to `users` (buyer).
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
