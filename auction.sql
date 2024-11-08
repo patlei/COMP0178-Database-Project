@@ -45,15 +45,87 @@ CREATE TABLE IF NOT EXISTS `users` (
 --
 
 CREATE TABLE IF NOT EXISTS `categories` (
-  `category_id` int(10) UNSIGNED NOT NULL,
-  `categoryName` varchar(30) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `category_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `category_section` varchar(30) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `category_name` varchar(30) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   PRIMARY KEY (`category_id`)  -- Added PRIMARY KEY for `category_id`.
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
+-- Inserting categories as these are going to be 'hardcoded' 
+
+INSERT INTO categories (category_section, category_name)
+VALUES
+('Men\'s Clothing', 'T-Shirts & Polos'),
+('Men\'s Clothing', 'Jeans & Trousers'),
+('Men\'s Clothing', 'Shirts'),
+('Men\'s Clothing', 'Jackets & Coats'),
+('Men\'s Clothing', 'Suits & Blazers'),
+('Men\'s Clothing', 'Sweaters & Hoodies'),
+('Men\'s Clothing', 'Activewear'),
+('Men\'s Clothing', 'Shorts & Swimwear'),
+('Men\'s Clothing', 'Sleepwear & Loungewear'),
+('Men\'s Clothing', 'Outerwear & Rainwear'),
+
+('Women\'s Clothing', 'Dresses & Skirts'),
+('Women\'s Clothing', 'Tops & Blouses'),
+('Women\'s Clothing', 'Jeans & Trousers'),
+('Women\'s Clothing', 'Jackets & Coats'),
+('Women\'s Clothing', 'Suits & Blazers'),
+('Women\'s Clothing', 'Sweaters & Cardigans'),
+('Women\'s Clothing', 'Activewear'),
+('Women\'s Clothing', 'Lingerie & Sleepwear'),
+('Women\'s Clothing', 'Maternity Clothing'),
+('Women\'s Clothing', 'Outerwear & Rainwear'),
+
+('Footwear', 'Sneakers & Sports Shoes'),
+('Footwear', 'Boots'),
+('Footwear', 'Sandals & Flip-flops'),
+('Footwear', 'Flats'),
+('Footwear', 'Heels & Pumps'),
+('Footwear', 'Loafers & Moccasins'),
+('Footwear', 'Slippers'),
+('Footwear', 'Formal Shoes'),
+('Footwear', 'Work Boots'),
+('Footwear', 'Rain Boots'),
+
+('Accessories', 'Bags & Purses'),
+('Accessories', 'Hats & Caps'),
+('Accessories', 'Scarves & Shawls'),
+('Accessories', 'Sunglasses & Eyewear'),
+('Accessories', 'Belts'),
+('Accessories', 'Watches'),
+('Accessories', 'Jewelry'),
+('Accessories', 'Gloves & Mittens'),
+('Accessories', 'Wallets & Cardholders'),
+('Accessories', 'Hair Accessories'),
+
+('Athletic Wear & Sportswear', 'Sports Bras & Tops'),
+('Athletic Wear & Sportswear', 'Leggings & Tights'),
+('Athletic Wear & Sportswear', 'Shorts & Tracksuits'),
+('Athletic Wear & Sportswear', 'Running Shoes & Sneakers'),
+('Athletic Wear & Sportswear', 'Gym Bags & Accessories'),
+('Athletic Wear & Sportswear', 'Yoga & Pilates Gear'),
+('Athletic Wear & Sportswear', 'Swimwear'),
+('Athletic Wear & Sportswear', 'Outdoor Sportswear'),
+
+('Kids & Baby Clothing', 'Boys\' Clothing'),
+('Kids & Baby Clothing', 'Girls\' Clothing'),
+('Kids & Baby Clothing', 'Baby Clothing (0-24 months)'),
+('Kids & Baby Clothing', 'Shoes & Footwear'),
+('Kids & Baby Clothing', 'Kids\' Accessories'),
+('Kids & Baby Clothing', 'Toys'),
+
+('Other', 'Other');  -- not specified for now
+
+
+-- --------------------------------------------------------
+
 --
 -- Table structure for table `auction`
+--
+-- This table now combines item and auction details (item_id replaced by auction_id).
 --
 
 CREATE TABLE IF NOT EXISTS `auction` (
@@ -98,7 +170,7 @@ CREATE TABLE IF NOT EXISTS `bids` (
 --
 
 CREATE TABLE IF NOT EXISTS `closed_auctions` (
-  `win_id` int(10) UNSIGNED NOT NULL,
+  `win_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `auction_id` int(10) UNSIGNED NOT NULL, 
   `bid_id` int(10) UNSIGNED NOT NULL,  -- Bid that won the auction.
   `seller_rating` int(10) UNSIGNED NOT NULL,
@@ -145,6 +217,21 @@ CREATE TABLE IF NOT EXISTS `purchases` (
   FOREIGN KEY (`auction_id`) REFERENCES `auction` (`auction_id`),  -- {FK} to `auction`.
   FOREIGN KEY (`buyer_username`) REFERENCES `users` (`username`)  -- {FK} to `users` (buyer).
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+-- Table structure for table 'watchlist' 
+-- This table tracks which auction users are watching
+
+CREATE TABLE IF NOT EXISTS `watchlist` (
+  `watch_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `username` varchar(30) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,  -- username.
+  `auction_id` int(10) UNSIGNED NOT NULL,
+  PRIMARY KEY (`watch_id`),  -- PRIMARY KEY for `watchlist`.
+  FOREIGN KEY (`username`) REFERENCES `users` (`username`),  -- {FK} to `users`.
+  FOREIGN KEY (`auction_id`) REFERENCES `auction` (`auction_id`)  -- {FK} to `auction`.
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 
 -- --------------------------------------------------------
 
