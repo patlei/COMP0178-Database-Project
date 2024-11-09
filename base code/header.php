@@ -40,8 +40,7 @@ if (!isset($_SESSION['logged_in'])) {
   // current status (session).
   if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] == true) {
     echo '<a class="nav-link" href="logout.php">Logout</a>';
-  }
-  else {
+  } else {
     echo '<button type="button" class="btn nav-link" data-toggle="modal" data-target="#loginModal">Login</button>';
   }
 ?>
@@ -49,33 +48,36 @@ if (!isset($_SESSION['logged_in'])) {
     </li>
   </ul>
 </nav>
+
+<!-- Second Navbar  -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <ul class="navbar-nav align-middle">
-	<li class="nav-item mx-1">
+    <li class="nav-item mx-1">
       <a class="nav-link" href="browse.php">Browse</a>
     </li>
+    
 <?php
-  if (isset($_SESSION['account_type']) && $_SESSION['account_type'] == 'buyer') {
-  echo('
-	<li class="nav-item mx-1">
-      <a class="nav-link" href="mybids.php">My Bids</a>
-    </li>
-	<li class="nav-item mx-1">
-      <a class="nav-link" href="recommendations.php">Recommended</a>
-    </li>');
-  }
-  if (isset($_SESSION['account_type']) && $_SESSION['account_type'] == 'seller') {
-  echo('
-	<li class="nav-item mx-1">
-      <a class="nav-link" href="mylistings.php">My Listings</a>
-    </li>
-	<li class="nav-item ml-3">
-      <a class="nav-link btn border-light" href="create_auction.php">+ Create auction</a>
-    </li>');
+  // If user is logged in, show all 4 buttons
+  if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
+    echo('
+      <li class="nav-item mx-1">
+        <a class="nav-link" href="mybids.php">My Bids</a>
+      </li>
+      <li class="nav-item mx-1">
+        <a class="nav-link" href="recommendations.php">Recommended</a>
+      </li>
+      <li class="nav-item mx-1">
+        <a class="nav-link" href="mylistings.php">My Listings</a>
+      </li>
+      <li class="nav-item ml-3">
+        <a class="nav-link btn border-light" href="create_auction.php">+ Create Auction</a>
+      </li>
+    ');
   }
 ?>
   </ul>
 </nav>
+
 
 <!-- Login modal -->
 <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">

@@ -36,7 +36,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 // Successful login, set session variables
                 $_SESSION['logged_in'] = true;
                 $_SESSION['username'] = $user['username'];
-                $_SESSION['account_type'] = $user['account_type']; // 'buyer' or 'seller' from DB
                 
                 // Redirect to home page after successful login
                 header("Location: index.php");
