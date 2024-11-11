@@ -46,79 +46,42 @@ CREATE TABLE IF NOT EXISTS `users` (
 
 CREATE TABLE IF NOT EXISTS `categories` (
   `category_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `category_section` varchar(30) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `category_name` varchar(30) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  PRIMARY KEY (`category_id`)  -- Added PRIMARY KEY for `category_id`.
+  `category_name` VARCHAR(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `category_section` VARCHAR(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  PRIMARY KEY (`category_id`),  -- Added PRIMARY KEY.
+  UNIQUE KEY `unique_category` (`category_name`, `category_section`)  -- Ensure the combination is unique
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 
 -- --------------------------------------------------------
 
 -- Inserting categories as these are going to be 'hardcoded' 
 
-INSERT INTO categories (category_section, category_name)
+INSERT IGNORE INTO categories (category_section, category_name)
 VALUES
-('Men\'s Clothing', 'T-Shirts & Polos'),
-('Men\'s Clothing', 'Jeans & Trousers'),
-('Men\'s Clothing', 'Shirts'),
-('Men\'s Clothing', 'Jackets & Coats'),
-('Men\'s Clothing', 'Suits & Blazers'),
-('Men\'s Clothing', 'Sweaters & Hoodies'),
-('Men\'s Clothing', 'Activewear'),
-('Men\'s Clothing', 'Shorts & Swimwear'),
-('Men\'s Clothing', 'Sleepwear & Loungewear'),
-('Men\'s Clothing', 'Outerwear & Rainwear'),
+('Do it yourself!', 'Knit patterns'),
+('Do it yourself!', 'Crochet patterns'),
+('Do it yourself!', 'Project kits'),
+('Do it yourself!', 'Other DIY'),
 
-('Women\'s Clothing', 'Dresses & Skirts'),
-('Women\'s Clothing', 'Tops & Blouses'),
-('Women\'s Clothing', 'Jeans & Trousers'),
-('Women\'s Clothing', 'Jackets & Coats'),
-('Women\'s Clothing', 'Suits & Blazers'),
-('Women\'s Clothing', 'Sweaters & Cardigans'),
-('Women\'s Clothing', 'Activewear'),
-('Women\'s Clothing', 'Lingerie & Sleepwear'),
-('Women\'s Clothing', 'Maternity Clothing'),
-('Women\'s Clothing', 'Outerwear & Rainwear'),
+('Clothes & Accessories', 'Sweaters & Cardigans'),
+('Clothes & Accessories', 'Headwear'),
+('Clothes & Accessories', 'Scarves'),
+('Clothes & Accessories', 'Mittens'),
+('Clothes & Accessories', 'Socks'),
+('Clothes & Accessories', 'Baby clothing'),
+('Clothes & Accessories', 'Other clothes'),
 
-('Footwear', 'Sneakers & Sports Shoes'),
-('Footwear', 'Boots'),
-('Footwear', 'Sandals & Flip-flops'),
-('Footwear', 'Flats'),
-('Footwear', 'Heels & Pumps'),
-('Footwear', 'Loafers & Moccasins'),
-('Footwear', 'Slippers'),
-('Footwear', 'Formal Shoes'),
-('Footwear', 'Work Boots'),
-('Footwear', 'Rain Boots'),
+('Home & Toys', '⁠Amigurumi & Toys'),
+('Home & Toys', 'Blankets'),
+('Home & Toys', 'Pillows & Cushion covers'),
+('Home & Toys', 'Other home decor');
 
-('Accessories', 'Bags & Purses'),
-('Accessories', 'Hats & Caps'),
-('Accessories', 'Scarves & Shawls'),
-('Accessories', 'Sunglasses & Eyewear'),
-('Accessories', 'Belts'),
-('Accessories', 'Watches'),
-('Accessories', 'Jewelry'),
-('Accessories', 'Gloves & Mittens'),
-('Accessories', 'Wallets & Cardholders'),
-('Accessories', 'Hair Accessories'),
-
-('Athletic Wear & Sportswear', 'Sports Bras & Tops'),
-('Athletic Wear & Sportswear', 'Leggings & Tights'),
-('Athletic Wear & Sportswear', 'Shorts & Tracksuits'),
-('Athletic Wear & Sportswear', 'Running Shoes & Sneakers'),
-('Athletic Wear & Sportswear', 'Gym Bags & Accessories'),
-('Athletic Wear & Sportswear', 'Yoga & Pilates Gear'),
-('Athletic Wear & Sportswear', 'Swimwear'),
-('Athletic Wear & Sportswear', 'Outdoor Sportswear'),
-
-('Kids & Baby Clothing', 'Boys\' Clothing'),
-('Kids & Baby Clothing', 'Girls\' Clothing'),
-('Kids & Baby Clothing', 'Baby Clothing (0-24 months)'),
-('Kids & Baby Clothing', 'Shoes & Footwear'),
-('Kids & Baby Clothing', 'Kids\' Accessories'),
-('Kids & Baby Clothing', 'Toys'),
-
-('Other', 'Other');  -- not specified for now
-
+SELECT * 
+FROM `categories`
+ORDER BY 
+    FIELD(`category_section`, 'Do it yourself!', 'Clothes & Accessories', 'Home & Toys'),  -- Custom order for category_section
+    `category_id`; 
 
 -- --------------------------------------------------------
 
