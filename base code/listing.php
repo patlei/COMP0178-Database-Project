@@ -1,36 +1,102 @@
-<?php include_once("header.php")?>
-<?php require("utilities.php")?>
-
 <?php
-  // Get info from the URL:
-  $item_id = $_GET['item_id'];
+include_once("header.php");
+include_once("connection.php");
+require("utilities.php");
 
-  // TODO: Use item_id to make a query to the database.
 
-  // DELETEME: For now, using placeholder data.
-  $title = "Placeholder title";
-  $description = "Description blah blah blah";
-  $current_price = 30.50;
-  $num_bids = 1;
-  $end_time = new DateTime('2020-11-02T00:00:00');
+// Start the session
+session_start();
+
+// Get auction_id
+if (isset($_GET['auction_id']) && is_numeric($_GET['auction_id'])) {
+    $item_id = $_GET['auction_id'];
+} else {
+    // Handle invalid or missing item_id
+    die("Invalid item ID.");
+}
+
+// Prepare and execute the query to get auction details
+$query = "SELECT item_name, item_description, starting_price, end_date FROM auction WHERE auction_id = ?";
+$stmt = $conn->prepare($query);
+
+// Check if the query preparation is successful
+if (!$stmt) {
+    die('Query preparation failed: ' . $conn->error);
+}
+
+$stmt->bind_param("i", $item_id);
+$stmt->execute();
+
+// Check if the query execution is successful
+if ($stmt->errno) {
+    die('Query execution failed: ' . $stmt->error);
+}
+
+// Bind results to variables
+$stmt->bind_result($title, $description, $starting_price, $end_time);
+
+// Fetch the result
+$stmt->fetch();
+
+$stmt->close(); // Always close the prepared statement
+
+
+// Query to get the highest bid for the item
+$query = "SELECT MAX(bid_amount) FROM bids WHERE auction_id = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $item_id);
+$stmt->execute();
+$stmt->bind_result($current_price);
+$stmt->fetch();
+$stmt->close();
+
+// If there are no bids, set the starting price as the current bid
+if ($current_price === null) {
+    $current_price = $starting_price;
+}
+#add number of bids
 
   // TODO: Note: Auctions that have ended may pull a different set of data,
   //       like whether the auction ended in a sale or was cancelled due
-  //       to lack of high-enough bids. Or maybe not.
+  //       to lack of high-enough bids. Or maybe not. --> TO BE DONE STILL
   
   // Calculate time to auction end:
   $now = new DateTime();
   
-  if ($now < $end_time) {
+// Calculate time to auction end:
+$now = new DateTime();
+$end_time = new DateTime($end_time); // Convert $end_time to DateTime object
+if ($now < $end_time) {
     $time_to_end = date_diff($now, $end_time);
     $time_remaining = ' (in ' . display_time_remaining($time_to_end) . ')';
-  }
-  
-  // TODO: If the user has a session, use it to make a query to the database
-  //       to determine if the user is already watching this item.
-  //       For now, this is hardcoded.
-  $has_session = true;
-  $watching = false;
+}
+
+
+// Check if the user is logged in 
+if (isset($_SESSION['username'])) {
+    $username = $_SESSION['username']; // Get the username from the session
+    $has_session = true;
+
+   // Query to check if the user is watching this auction
+    $query = "SELECT COUNT(*) FROM watchlist WHERE username = ? AND auction_id = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("si", $username, $item_id); 
+    $stmt->execute();
+    $stmt->bind_result($count);
+    $stmt->fetch();
+    
+    // If the count is greater than 0, the user is watching the item
+    if ($count > 0) {
+        $watching = true;
+    } else {
+        $watching = false;
+    }
+
+    $stmt->close(); // Close the prepared statement
+} else {
+    $has_session = false; // If there is no session, the user is not logged in
+    $watching = false; // Cannot be watching anything if not logged in
+}
 ?>
 
 
@@ -96,6 +162,22 @@
 
 
 <?php include_once("footer.php")?>
+
+<!-- validate the bid if higher than current price before submitting the form -->
+<script>
+  // JavaScript function to validate the bid
+  $("form").submit(function(e) {
+      var bidAmount = parseFloat($("#bid").val()); // Get the bid amount entered by the user
+      var currentBid = <?php echo($current_price); ?>; // The current bid value fetched from the server
+
+      if (bidAmount <= currentBid) {
+          e.preventDefault();  // Prevent the form from submitting
+          alert("Your bid must be higher than the current bid.");
+      }
+  });
+</script>
+
+</div> <!-- End of container -->
 
 
 <script> 
