@@ -5,7 +5,7 @@ require("utilities.php");
 
 
 // Start the session
-session_start();
+session_start(); #Can this be deleted???? warning says ignoring as session already exists
 
 // Get auction_id
 if (isset($_GET['auction_id']) && is_numeric($_GET['auction_id'])) {
