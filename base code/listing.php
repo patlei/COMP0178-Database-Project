@@ -5,7 +5,7 @@ require("utilities.php");
 
 
 // Start the session
-session_start();# can i delete this because i have a notice on my page
+session_start();
 
 // Get auction_id
 if (isset($_GET['auction_id']) && is_numeric($_GET['auction_id'])) {
