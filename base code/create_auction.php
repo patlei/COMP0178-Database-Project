@@ -11,7 +11,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 }
 
 // Query to get the categories from the database
-$query = "SELECT category_section, category_name FROM categories ORDER BY category_id";  
+$query = "SELECT category_section, category_name FROM categories ORDER BY category_section, category_name";
 $result = mysqli_query($conn, $query);
 
 // Check if the query was successful
