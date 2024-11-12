@@ -1,7 +1,6 @@
 <?php include_once("header.php");
 include 'connection.php'; 
 
-session_start();
 ?>
 
 <div class="container my-5">

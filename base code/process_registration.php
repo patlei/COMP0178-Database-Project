@@ -4,50 +4,73 @@ ini_set('display_errors', 1);
 include 'connection.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['username'], $_POST['email'], $_POST['password'], $_POST['passwordConfirmation'], $_POST['accountType'])) {
+    if (isset($_POST['username'], $_POST['email'], $_POST['password'], $_POST['passwordConfirmation'])) {
         
-        $username = $_POST['username']; // New field
-        $accountType = $_POST['accountType'];
+        $username = $_POST['username'];
         $email = $_POST['email'];
         $password = $_POST['password'];
         $passwordConfirmation = $_POST['passwordConfirmation'];
 
         // Check if passwords match
         if ($password !== $passwordConfirmation) {
-            echo "Passwords do not match.";
+            $error = "Passwords do not match.";
+            header("Location: register.php?error=" . urlencode($error));
             exit();
         }
 
-        // Check if the email is already registered with the same account type
-        $sql = "SELECT * FROM users WHERE email = ? AND accountType = ?";
+        // Check if password length is between 8 and 25 characters
+        if (strlen($password) < 8 || strlen($password) > 25) {
+            $error = "Password must be between 8 and 25 characters.";
+            header("Location: register.php?error=" . urlencode($error));
+            exit();
+        }
+
+        // Check if email contains "@" symbol
+        if (strpos($email, '@') === false) {
+            $error = "Email must contain '@' symbol.";
+            header("Location: register.php?error=" . urlencode($error));
+            exit();
+        }
+
+        // Check if the email or the username is already registered
+        $sql = "SELECT * FROM users WHERE username = ? OR email = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ss", $email, $accountType);
+        $stmt->bind_param("ss", $username, $email);
         $stmt->execute();
         $result = $stmt->get_result();
 
         if ($result->num_rows > 0) {
-            echo "Account already exists";
+            $error = "Account already exists with this username or email.";
+            header("Location: register.php?error=" . urlencode($error));
             exit();
         } else {
-            // Hash the password before storing it in the database
-            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-            $sql = "INSERT INTO users (username, accountType, email, password) VALUES (?, ?, ?, ?)";
+            // Insert new user into the database
+            $sql = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("ssss", $username, $accountType, $email, $hashedPassword);
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT); // Hashing the password for security
+            $stmt->bind_param("sss", $username, $email, $hashedPassword);
 
             if ($stmt->execute()) {
-                echo "Registration successful!";
+                header("Location: register.php?success=1"); // Redirect to register.php with success parameter
+                exit();
             } else {
-                echo "Error inserting data: " . $stmt->error;
+                $error = "Error inserting data: " . $stmt->error;
+                header("Location: register.php?error=" . urlencode($error));
+                exit();
             }
         }
 
         $stmt->close();
     } else {
-        echo "Required form data is missing.";
+        $error = "Required form data is missing.";
+        header("Location: register.php?error=" . urlencode($error));
+        exit();
     }
 } else {
-    echo "Invalid request method.";
+    $error = "Invalid request method.";
+    header("Location: register.php?error=" . urlencode($error));
+    exit();
 }
 
 $conn->close();
+?>
