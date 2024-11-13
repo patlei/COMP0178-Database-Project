@@ -1,7 +1,7 @@
 <?php 
 include_once("header.php");
 include 'connection.php'; 
-
+############### ADDING IMAGES OPTION is meh#####################
 session_start();
 
 // Check if the user is logged in
@@ -12,13 +12,38 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 
 // Query to get the categories from the database
 $query = "SELECT category_section, category_name FROM categories ORDER BY category_id";  
-$result = mysqli_query($conn, $query);
+$category_result = mysqli_query($conn, $query);
 
 // Check if the query was successful
-if (!$result) {
+if (!$category_result) {
+    die("Query failed: " . mysqli_error($conn));
+}
+// Query to get the sizes from the database
+$query2 = "SELECT size FROM sizes ORDER BY size_id ASC";  
+$size_result = mysqli_query($conn, $query2);
+
+// Check if the query was successful
+if (!$size_result) {
     die("Query failed: " . mysqli_error($conn));
 }
 
+// Query to get the materials from the database
+$query3 = "SELECT material FROM materials";  
+$material_result = mysqli_query($conn, $query3);
+
+// Check if the query was successful
+if (!$material_result) {
+    die("Query failed: " . mysqli_error($conn));
+}
+
+// Query to get the materials from the database
+$query4 = "SELECT color FROM colors";  
+$color_result = mysqli_query($conn, $query4);
+
+// Check if the query was successful
+if (!$color_result) {
+    die("Query failed: " . mysqli_error($conn));
+}
 ?>
 
 <div class="container">
@@ -57,7 +82,7 @@ if (!$result) {
               <option selected>Choose...</option>
               <?php
                 // Loop through the categories and display them in the dropdown
-                while ($row = mysqli_fetch_assoc($result)) {
+                while ($row = mysqli_fetch_assoc($category_result)) {
                     $categorySection = $row['category_section'];
                     $categoryName = $row['category_name'];
                     echo "<option value='$categoryName'>$categorySection - $categoryName</option>";
@@ -65,6 +90,87 @@ if (!$result) {
               ?>
             </select>
             <small id="categoryHelp" class="form-text text-muted"><span class="text-danger">* Required.</span> Select a category for this item.</small>
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="auctionSize" class="col-sm-2 col-form-label text-right">Size</label>
+          <div class="col-sm-10">
+            <select class="form-control" id="auctionSize" name="auctionSize">
+              <option value="" selected>Choose...</option>
+              <?php
+                  // Check if the query result is valid and has rows
+                  if ($size_result && mysqli_num_rows($size_result) > 0) {
+                      // Loop through the sizes and display them in the dropdown
+                      while ($row = mysqli_fetch_assoc($size_result)) {
+                          $size = $row['size'];
+                          echo "<option value='" . htmlspecialchars($size) . "'>" . htmlspecialchars($size) . "</option>";
+                      }
+                  } else {
+                      echo "<option>No sizes available</option>";
+                  }
+              ?>
+            </select>
+            <small id="sizeHelp" class="form-text text-muted"> Optional. Select a size for this item.</small>
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="auctionMaterial" class="col-sm-2 col-form-label text-right">Material</label>
+          <div class="col-sm-10">
+            <select class="form-control" id="auctionMaterial" name="auctionMaterial">
+              <option value="" selected>Choose...</option>
+              <?php
+                  // Check if the query result is valid and has rows
+                  if ($material_result && mysqli_num_rows($material_result) > 0) {
+                      // Loop through the sizes and display them in the dropdown
+                      while ($row = mysqli_fetch_assoc($material_result)) {
+                          $material = $row['material'];
+                          echo "<option value='" . htmlspecialchars($material) . "'>" . htmlspecialchars($material) . "</option>";
+                      }
+                  } else {
+                      echo "<option>No materials available</option>";
+                  }
+              ?>
+            </select>
+            <small id="materialHelp" class="form-text text-muted">Optional. Select material for this item.</small>
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="auctionColor" class="col-sm-2 col-form-label text-right">Color</label>
+          <div class="col-sm-10">
+            <select class="form-control" id="auctionColor" name="auctionColor">
+              <option value="" selected>Choose...</option>
+              <?php
+                  // Check if the query result is valid and has rows
+                  if ($color_result && mysqli_num_rows($color_result) > 0) {
+                      // Loop through the sizes and display them in the dropdown
+                      while ($row = mysqli_fetch_assoc($color_result)) {
+                          $color = $row['color'];
+                          echo "<option value='" . htmlspecialchars($color) . "'>" . htmlspecialchars($color) . "</option>";
+                      }
+                  } else {
+                      echo "<option>No colors available</option>";
+                  }
+              ?>
+            </select>
+            <small id="colorHelp" class="form-text text-muted">Optional. Select color for this item.</small>
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="auctionCondition" class="col-sm-2 col-form-label text-right">Condition</label>
+          <div class="col-sm-10">
+            <select class="form-control" id="auctionCondition" name="auctionCondition" required>
+              <option value="" selected>Choose...</option>
+              <option value="new">new</option>
+              <option value="used">used</option>
+            </select>
+            <small id="conditionHelp" class="form-text text-muted"><span class="text-danger">* Required.</span> Select the condition of the item.</small>
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="auctionImage" class="col-sm-2 col-form-label text-right">Image path</label>
+          <div class="col-sm-10">
+            <input type="text" class="form-control" id="auctionImage" name="auctionImage">
+            <small id="imageHelp" class="form-text text-muted"> Optional. Provide an image path to an image you would like to upload</small>
           </div>
         </div>
         <div class="form-group row">

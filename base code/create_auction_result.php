@@ -1,6 +1,6 @@
 <?php include_once("header.php");
 include 'connection.php'; 
-
+############### ADDING IMAGES OPTION not great yet#####################
 session_start();
 ?>
 
@@ -20,7 +20,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $auctionStartPrice = isset($_POST['auctionStartPrice']) ? $_POST['auctionStartPrice'] : '';
     $auctionReservePrice = isset($_POST['auctionReservePrice']) ? $_POST['auctionReservePrice'] : ''; // Optional 
     $auctionEndDate = isset($_POST['auctionEndDate']) ? $_POST['auctionEndDate'] : '';
-
+    $auctionSize = isset($_POST['auctionSize']) ? $_POST['auctionSize'] : '';
+    $auctionMaterial = isset($_POST['auctionMaterial']) ? $_POST['auctionMaterial'] : '';
+    $auctionColor = isset($_POST['auctionColor']) ? $_POST['auctionColor'] : '';
+    $auctionCondition = isset($_POST['auctionCondition']) ? $_POST['auctionCondition'] : '';
+    $auctionImage = isset($_POST['auctionImage']) ? $_POST['auctionImage'] : '';
+#image_path	
     // Get today's date for start_date
     $auctionStartDate = date('Y-m-d');  // Current date in 'YYYY-MM-DD' format
 
@@ -44,14 +49,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo "Error: Category not found.";
             exit;
         }
+        // Query to retrieve size_id based on size
+        $sizeQuery = "SELECT size_id FROM sizes WHERE size = ?";
+        $stmtSize = $conn->prepare($sizeQuery);
+        $stmtSize->bind_param("s", $auctionSize);
+        $stmtSize->execute();
+        $stmtSize->bind_result($size_id);
+        $stmtSize->fetch();
+        $stmtSize->close();
+
+    
+        // Query to retrieve material_id based on material
+        $materialQuery = "SELECT material_id FROM materials WHERE material = ?";
+        $stmtMaterial = $conn->prepare($materialQuery);
+        $stmtMaterial->bind_param("s", $auctionMaterial);
+        $stmtMaterial->execute();
+        $stmtMaterial->bind_result($material_id);
+        $stmtMaterial->fetch();
+        $stmtMaterial->close();
+
+
+        // Query to retrieve color_id based on color
+        $colorQuery = "SELECT color_id FROM colors WHERE color = ?";
+        $stmtColor = $conn->prepare($colorQuery);
+        $stmtColor->bind_param("s", $auctionColor);
+        $stmtColor->execute();
+        $stmtColor->bind_result($color_id);
+        $stmtColor->fetch();
+        $stmtColor->close();
+
+        if (!$auctionCondition) {
+            echo "Error: Condition not found.";
+            exit;
+        }
 
         // Prepare SQL query to insert auction
-        $query = "INSERT INTO auction (username, item_name, item_description, category_id, starting_price, reserve_price, start_date, end_date, auction_status) 
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $query = "INSERT INTO auction (username, item_name, item_description, category_id, starting_price, reserve_price, start_date, end_date, auction_status, image_path, material_id, item_condition, color_id, size_id)
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($query);  // Use $query here
         if ($stmt) {
             // Bind parameters
-            $stmt->bind_param("ssssddsss", $username, $auctionTitle, $auctionDetails, $category_id, $auctionStartPrice, $auctionReservePrice, $auctionStartDate, $auctionEndDate, $auctionStatus);
+            $stmt->bind_param("ssssddssssssss", $username, $auctionTitle, $auctionDetails, $category_id, $auctionStartPrice, $auctionReservePrice, $auctionStartDate, $auctionEndDate, $auctionStatus, $auctionImage, $material_id, $auctionCondition, $color_id, $size_id);
 
             // Execute the statement
             if ($stmt->execute()) {
@@ -84,4 +122,4 @@ if (!$stmt->execute()) {
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
-?>
+?> 
