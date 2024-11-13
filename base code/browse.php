@@ -90,7 +90,7 @@ switch ($ordering) {
 }
 
 // Pagination setup
-$results_per_page = 10;
+$results_per_page = 9;
 $offset = ($curr_page - 1) * $results_per_page;
 $sql .= " LIMIT $results_per_page OFFSET $offset";
 
