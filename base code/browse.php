@@ -2,7 +2,7 @@
 // Include header, connection, and utility files for database and HTML functions.
 include_once("header.php");
 include_once("connection.php");
-require("utilities.php");
+require_once("utilities.php");
 
 // Retrieve search parameters, setting defaults if not provided
 $keyword = isset($_GET['keyword']) ? $_GET['keyword'] : "";

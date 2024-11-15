@@ -1,6 +1,6 @@
 <?php
 include_once("header.php"); // Assume header.php includes session_start()
-require("utilities.php");
+require_once("utilities.php");
 require("connection.php"); // Database connection
 
 echo "<div class='container'>";

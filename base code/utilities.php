@@ -3,7 +3,9 @@
 // display_time_remaining:
 // Helper function to help figure out what time to display
 function display_time_remaining($interval) {
-
+    // Set PHP's default timezone to UTC
+    date_default_timezone_set('UTC');
+  
     if ($interval->days == 0 && $interval->h == 0) {
       // Less than one hour remaining: print mins + seconds:
       $time_remaining = $interval->format('%im %Ss');
@@ -59,6 +61,33 @@ function print_listing_li($item_id, $title, $desc, $price, $num_bids, $end_time)
     <div class="text-center text-nowrap"><span style="font-size: 1.5em">£' . number_format($price, 2) . '</span><br/>' . $num_bids . $bid . '<br/>' . $time_remaining . '</div>
   </li>'
   );
+}
+
+
+// Function to update auction status based on the current date and time
+function update_auction_status($conn) {
+  // Set PHP's default timezone to UTC
+  date_default_timezone_set('UTC');
+  // Get current date and time
+  $current_time = date('Y-m-d H:i:s');
+
+  // Query to check all auctions where the end date has passed and status is still 'active'
+  $query = "UPDATE auction SET auction_status = 'closed' WHERE end_date < ? AND auction_status = 'active'";
+
+  // Prepare statement
+  $stmt = $conn->prepare($query);
+  if ($stmt) {
+      // Bind current time as parameter
+      $stmt->bind_param("s", $current_time);
+
+      // Execute the query
+      $stmt->execute();
+      
+      // Close the statement
+      $stmt->close();
+  } else {
+      echo "Error updating auction status: " . $conn->error;
+  }
 }
 
 ?>
