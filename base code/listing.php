@@ -13,6 +13,20 @@ session_start();
 //   exit;
 // }
 
+// Check if there is a success message and display it
+if (isset($_SESSION['success_message'])) {
+  echo '<div class="alert alert-success">' . $_SESSION['success_message'] . '</div>';
+  // Unset the success message so it doesn't show again on page refresh
+  unset($_SESSION['success_message']);
+}
+
+// Optionally, display any error messages
+if (isset($_SESSION['error_message'])) {
+  echo '<div class="alert alert-danger">' . $_SESSION['error_message'] . '</div>';
+  unset($_SESSION['error_message']);
+}
+
+
 // Get the auction ID from the URL parameter
 if (!isset($_GET['auction_id'])) {
   echo "No auction selected!";
@@ -60,14 +74,15 @@ $image_path = $auction['image_path'];
 
 $stmt->close();
 
-// Query to get the highest bid for the item
-$query = "SELECT MAX(bid_amount) FROM bids WHERE auction_id = ?";
+// Query to get the highest bid and the username of the highest bidder
+$query = "SELECT bid_amount, username FROM bids WHERE auction_id = ? ORDER BY bid_amount DESC LIMIT 1";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $item_id);
 $stmt->execute();
-$stmt->bind_result($current_price);
+$stmt->bind_result($current_price, $highest_bidder);
 $stmt->fetch();
 $stmt->close();
+
 
 
 // If there are no bids, set the current price as the starting price
@@ -196,6 +211,10 @@ if (isset($_SESSION['username'])) {
      Auction ends <?php echo(date_format($end_time, 'j M H:i') . $time_remaining) ?></p>  
     <p class="lead">Current bid: £<?php echo(number_format($current_price, 2)) ?></p>
     <p><strong>Number of Bids:</strong> <?php echo($num_bids); ?></p>
+    <!-- Displaying message for the user if their bid is the highest -->
+    <?php if (isset($_SESSION['username']) && $_SESSION['username'] === $highest_bidder): ?>
+      <p class="text-success">Highest bid is yours!</p>
+    <?php endif; ?>
 
 
     <!-- Bidding form -->
@@ -204,10 +223,13 @@ if (isset($_SESSION['username'])) {
         <div class="input-group-prepend">
           <span class="input-group-text">£</span>
         </div>
-	    <input type="number" class="form-control" id="bid">
+        <input type="number" class="form-control" id="bid" name="bid" required>
       </div>
+      <!-- Hidden auction_id  -->
+      <input type="hidden" name="auction_id" value="<?php echo $_GET['auction_id']; ?>">
       <button type="submit" class="btn btn-primary form-control">Place bid</button>
     </form>
+
 <?php endif ?>
 
   
