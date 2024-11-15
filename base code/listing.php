@@ -1,8 +1,9 @@
 <?php
 include_once("header.php");
 include_once("connection.php");
-require("utilities.php");
-
+require_once("utilities.php");
+// Set PHP's default timezone to UTC
+date_default_timezone_set('UTC');
 
 // // Start the session
 session_start(); 
@@ -98,10 +99,7 @@ $stmt_bids->bind_result($num_bids);
 $stmt_bids->fetch();
 $stmt_bids->close();
 
-
-  // Calculate time to auction end:
-  $now = new DateTime();
-  
+ 
 // Calculate time to auction end:
 $now = new DateTime();
 $end_time = new DateTime($end_time); // Convert $end_time to DateTime object

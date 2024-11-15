@@ -1,7 +1,7 @@
 <?php
 include_once("header.php");  
 include_once("connection.php"); 
-require("utilities.php");  
+require_once("utilities.php");  
 
 // Start the session to check the user credentials
 session_start();
