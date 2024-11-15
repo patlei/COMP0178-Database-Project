@@ -4,42 +4,61 @@ include_once("connection.php");
 require("utilities.php");
 
 
-// Start the session
-session_start(); #Can this be deleted???? warning says ignoring as session already exists
+// // Start the session
+session_start(); 
 
-// Get auction_id
-if (isset($_GET['auction_id']) && is_numeric($_GET['auction_id'])) {
-    $item_id = $_GET['auction_id'];
-} else {
-    // Handle invalid or missing item_id
-    die("Invalid item ID.");
+// // Check if the user is logged in
+// if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+//   header('Location: login.php'); // Redirect to login if not logged in
+//   exit;
+// }
+
+// Get the auction ID from the URL parameter
+if (!isset($_GET['auction_id'])) {
+  echo "No auction selected!";
+  exit;
 }
 
-// Prepare and execute the query to get auction details
-$query = "SELECT item_name, item_description, starting_price, end_date FROM auction WHERE auction_id = ?";
-$stmt = $conn->prepare($query);
+$item_id = $_GET['auction_id'];
 
-// Check if the query preparation is successful
-if (!$stmt) {
-    die('Query preparation failed: ' . $conn->error);
-}
-
+// Query to fetch the auction details along with category, size, material, color, condition, and views
+$sql = "SELECT a.item_name, a.item_description, a.category_id, a.starting_price, a.reserve_price, a.end_date, a.auction_status,
+               a.image_path, a.material_id, a.item_condition, a.color_id, a.size_id, a.views,
+               c.category_name, s.size, m.material, co.color
+        FROM auction a
+        LEFT JOIN categories c ON a.category_id = c.category_id
+        LEFT JOIN sizes s ON a.size_id = s.size_id
+        LEFT JOIN materials m ON a.material_id = m.material_id
+        LEFT JOIN colors co ON a.color_id = co.color_id
+        WHERE a.auction_id = ?";
+$stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $item_id);
 $stmt->execute();
+$result = $stmt->get_result();
 
-// Check if the query execution is successful
-if ($stmt->errno) {
-    die('Query execution failed: ' . $stmt->error);
+if ($result->num_rows === 0) {
+    echo "Auction not found!";
+    exit;
 }
 
-// Bind results to variables
-$stmt->bind_result($title, $description, $starting_price, $end_time);
+$auction = $result->fetch_assoc();
 
-// Fetch the result
-$stmt->fetch();
+// Extract auction details and associated values
+$title = $auction['item_name'];
+$description = $auction['item_description'];
+$category = $auction['category_name'];
+$size = $auction['size'];
+$material = $auction['material'];
+$color = $auction['color'];
+$condition = $auction['item_condition'];
+$views = $auction['views'];
+$starting_price = $auction['starting_price'];
+$reserve_price = $auction['reserve_price'];
+$end_time = $auction['end_date'];
+$auction_status = $auction['auction_status'];
+$image_path = $auction['image_path'];
 
-$stmt->close(); // Always close the prepared statement
-
+$stmt->close();
 
 // Query to get the highest bid for the item
 $query = "SELECT MAX(bid_amount) FROM bids WHERE auction_id = ?";
@@ -50,16 +69,21 @@ $stmt->bind_result($current_price);
 $stmt->fetch();
 $stmt->close();
 
-// If there are no bids, set the starting price as the current bid
+
+// If there are no bids, set the current price as the starting price
 if ($current_price === null) {
     $current_price = $starting_price;
 }
-#add number of bids
+// Query to count the number of bids for this auction
+$query_bids = "SELECT COUNT(*) FROM bids WHERE auction_id = ?";
+$stmt_bids = $conn->prepare($query_bids);
+$stmt_bids->bind_param("i", $item_id);
+$stmt_bids->execute();
+$stmt_bids->bind_result($num_bids);
+$stmt_bids->fetch();
+$stmt_bids->close();
 
-  // TODO: Note: Auctions that have ended may pull a different set of data,
-  //       like whether the auction ended in a sale or was cancelled due
-  //       to lack of high-enough bids. Or maybe not. --> TO BE DONE STILL
-  
+
   // Calculate time to auction end:
   $now = new DateTime();
   
@@ -69,7 +93,8 @@ $end_time = new DateTime($end_time); // Convert $end_time to DateTime object
 if ($now < $end_time) {
     $time_to_end = date_diff($now, $end_time);
     $time_remaining = ' (in ' . display_time_remaining($time_to_end) . ')';
-}
+} 
+
 
 
 // Check if the user is logged in 
@@ -122,12 +147,27 @@ if (isset($_SESSION['username'])) {
 <?php endif /* Print nothing otherwise */ ?>
   </div>
 </div>
-
-<div class="row"> <!-- Row #2 with auction description + bidding info -->
+<div class="row"> <!-- Row for item image and description -->
+    <div class="col-sm-4"> <!-- Left column for image -->
+      <?php if (!empty($image_path)): ?>
+        <img src="<?php echo($image_path); ?>" alt="Auction Item Image" class="img-fluid">
+      <?php else: ?>
+        <p>No image available for this auction.</p>
+      <?php endif; ?>
+    </div>
+<div class="row"> <!-- Row #2 with auction information + bidding info -->
   <div class="col-sm-8"> <!-- Left col with item info -->
 
     <div class="itemDescription">
-    <?php echo($description); ?>
+    <p><strong>Description:</strong> <?php echo($description); ?></p>
+
+    <!-- Item Information -->
+    <p><strong>Category:</strong> <?php echo($category); ?></p>
+      <p><strong>Size:</strong> <?php echo($size); ?></p>
+      <p><strong>Material:</strong> <?php echo($material); ?></p>
+      <p><strong>Color:</strong> <?php echo($color); ?></p>
+      <p><strong>Condition:</strong> <?php echo($condition); ?></p>
+      <p><strong>Views:</strong> <?php echo($views); ?></p>
     </div>
 
   </div>
@@ -136,11 +176,27 @@ if (isset($_SESSION['username'])) {
 
     <p>
 <?php if ($now > $end_time): ?>
-     This auction ended <?php echo(date_format($end_time, 'j M H:i')) ?>
-     <!-- TODO: Print the result of the auction here? -->
+  <?php 
+    // If no bids or reserve price not met, display "ended without a sale"
+    if ($num_bids == 0 || ($reserve_price > 0 && $current_price < $reserve_price)): ?>
+        <!-- Auction ended without a sale -->
+        This auction ended without a sale on <?php echo date_format($end_time, 'j M H:i'); ?>
+        <?php if ($num_bids == 0): ?>
+            No bids were placed.
+        <?php endif; ?>
+        <?php if ($reserve_price > 0 && $current_price < $reserve_price): ?>
+            The reserve price of £<?php echo number_format($reserve_price, 2); ?> was not met.
+        <?php endif; ?>
+  <?php else: ?>
+        <!-- Auction ended with a sale -->
+        This auction ended <?php echo date_format($end_time, 'j M H:i'); ?><br>
+        Sold for £<?php echo number_format($current_price, 2); ?>
+    <?php endif; ?>
 <?php else: ?>
      Auction ends <?php echo(date_format($end_time, 'j M H:i') . $time_remaining) ?></p>  
     <p class="lead">Current bid: £<?php echo(number_format($current_price, 2)) ?></p>
+    <p><strong>Number of Bids:</strong> <?php echo($num_bids); ?></p>
+
 
     <!-- Bidding form -->
     <form method="POST" action="place_bid.php">
@@ -182,70 +238,49 @@ if (isset($_SESSION['username'])) {
 
 <script> 
 // JavaScript functions: addToWatchlist and removeFromWatchlist.
-
 function addToWatchlist(button) {
-  console.log("These print statements are helpful for debugging btw");
-
-  // This performs an asynchronous call to a PHP function using POST method.
-  // Sends item ID as an argument to that function.
   $.ajax('watchlist_funcs.php', {
     type: "POST",
-    data: {functionname: 'add_to_watchlist', arguments: [<?php echo($item_id);?>]},
+    data: { functionname: 'add_to_watchlist', arguments: <?php echo json_encode($item_id); ?> },
+    success: function(response) {
+      var obj = JSON.parse(response);  // Parse the JSON response
+      console.log(obj);  // Debugging
 
-    success: 
-      function (obj, textstatus) {
-        // Callback function for when call is successful and returns obj
-        console.log("Success");
-        var objT = obj.trim();
- 
-        if (objT == "success") {
-          $("#watch_nowatch").hide();
-          $("#watch_watching").show();
-        }
-        else {
-          var mydiv = document.getElementById("watch_nowatch");
-          mydiv.appendChild(document.createElement("br"));
-          mydiv.appendChild(document.createTextNode("Add to watch failed. Try again later."));
-        }
-      },
-
-    error:
-      function (obj, textstatus) {
-        console.log("Error");
+      if (obj.status == "success") {
+        // Hide the "Add to Watchlist" button and show the "Watching" button
+        $("#watch_nowatch").hide(); // Hide the "Add to Watchlist"
+        $("#watch_watching").show(); // Show the "Watching" button
+      } else {
+        alert(obj.message); 
       }
-  }); // End of AJAX call
+    },
+    error: function() {
+      alert("An error occurred while adding to the watchlist.");
+    }
+  });
+}
 
-} // End of addToWatchlist func
 
 function removeFromWatchlist(button) {
-  // This performs an asynchronous call to a PHP function using POST method.
-  // Sends item ID as an argument to that function.
   $.ajax('watchlist_funcs.php', {
     type: "POST",
-    data: {functionname: 'remove_from_watchlist', arguments: [<?php echo($item_id);?>]},
+    data: { functionname: 'remove_from_watchlist', arguments: <?php echo json_encode($item_id); ?> },
+    success: function(response) {
+      var obj = JSON.parse(response);  // Parse the JSON response
+      console.log(obj);  // Debugging
 
-    success: 
-      function (obj, textstatus) {
-        // Callback function for when call is successful and returns obj
-        console.log("Success");
-        var objT = obj.trim();
- 
-        if (objT == "success") {
-          $("#watch_watching").hide();
-          $("#watch_nowatch").show();
-        }
-        else {
-          var mydiv = document.getElementById("watch_watching");
-          mydiv.appendChild(document.createElement("br"));
-          mydiv.appendChild(document.createTextNode("Watch removal failed. Try again later."));
-        }
-      },
-
-    error:
-      function (obj, textstatus) {
-        console.log("Error");
+      if (obj.status == "success") {
+        // Hide the "Watching" button and show the "Add to Watchlist" button
+        $("#watch_watching").hide(); // Hide the "Watching"
+        $("#watch_nowatch").show(); // Show the "Add to Watchlist"
+      } else {
+        alert(obj.message); 
       }
-  }); // End of AJAX call
+    },
+    error: function() {
+      alert("An error occurred while removing from the watchlist.");
+    }
+  });
+}
 
-} // End of addToWatchlist func
 </script>

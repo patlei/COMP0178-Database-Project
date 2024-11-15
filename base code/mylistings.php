@@ -32,7 +32,7 @@ if (!isset($_SESSION['username'])) {
             $auction_status = htmlspecialchars($row['auction_status']); // Retrieve auction status
 
             echo "<div class='listing-item'>";
-            echo "<h5><a href='auction.php?id=$auction_id'>$item_name</a></h5>";
+            echo "<h5><a href='listing.php?auction_id=$auction_id'>$item_name</a></h5>";
             echo "<p>Item Description: $description</p>";
             echo "<p>Starting Price: £$starting_price</p>";
             echo "<p>End Date: $end_date</p>";
