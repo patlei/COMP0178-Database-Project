@@ -1,24 +1,60 @@
-<?php include_once("header.php")?>
-<?php require("utilities.php")?>
-
-<div class="container">
-
-<h2 class="my-3">My bids</h2>
-
 <?php
-  // This page is for showing a user the auctions they've bid on.
-  // It will be pretty similar to browse.php, except there is no search bar.
-  // This can be started after browse.php is working with a database.
-  // Feel free to extract out useful functions from browse.php and put them in
-  // the shared "utilities.php" where they can be shared by multiple files.
-  
-  
-  // TODO: Check user's credentials (cookie/session).
-  
-  // TODO: Perform a query to pull up the auctions they've bidded on.
-  
-  // TODO: Loop through results and print them out as list items.
-  
-?>
+include_once("header.php");  
+include_once("connection.php"); 
+require("utilities.php");  
 
-<?php include_once("footer.php")?>
+// Start the session to check the user credentials
+session_start();
+
+// Check if the user is logged in
+if (!isset($_SESSION['username'])) {
+    echo "<p>You must be logged in to view your bids. <a href='login.php'>Login</a></p>";
+    exit;
+}
+
+// Get the logged-in username from the session
+$username = $_SESSION['username'];
+
+// Query to get the auctions the user has bid on
+$query = "
+    SELECT a.auction_id, a.item_name, a.item_description, MAX(b.bid_amount) AS current_price, 
+           COUNT(b.bid_id) AS num_bids, a.end_date
+    FROM bids b
+    JOIN auction a ON b.auction_id = a.auction_id
+    WHERE b.username = ?
+    GROUP BY a.auction_id
+    ORDER BY a.end_date DESC";  // You can change the ordering based on your needs
+
+$stmt = $conn->prepare($query);
+$stmt->bind_param("s", $username);  // Bind the username to the query
+$stmt->execute();
+$result = $stmt->get_result();
+
+// Check if there are any results
+if ($result->num_rows > 0) {
+    echo '<h2>Your Bids</h2>';
+    echo '<ul class="list-group">';  // Start a list for the auction items
+
+    // Loop through the results and use the print_listing_li function to display them
+    while ($row = $result->fetch_assoc()) {
+        $item_id = $row['auction_id'];
+        $title = $row['item_name'];
+        $desc = $row['item_description'];
+        $price = $row['current_price'];
+        $num_bids = $row['num_bids'];
+        $end_time = new DateTime($row['end_date']);  // Convert end_time to DateTime object
+
+        // Use the print_listing_li function to display each auction
+        print_listing_li($item_id, $title, $desc, $price, $num_bids, $end_time);
+    }
+
+    echo '</ul>';  // End the list
+} else {
+    echo "<p>You have not placed any bids yet.</p>";
+}
+
+$stmt->close();  
+$conn->close();  
+
+include_once("footer.php"); 
+?>
