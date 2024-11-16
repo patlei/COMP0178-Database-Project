@@ -54,7 +54,7 @@
         </div>
     </form>
 
-    <div class="text-center">Already have an account? <a href="" data-toggle="modal" data-target="#loginModal">Login</a></div>
+    <div class="text-center">Already have an account? <a href="login.php">Login</a></div>
 </div>
 
 <script>

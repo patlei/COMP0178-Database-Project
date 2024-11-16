@@ -37,6 +37,15 @@ CREATE TABLE IF NOT EXISTS `users` (
   PRIMARY KEY (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+INSERT INTO users (username, email, password, average_rating, accountType)
+VALUES 
+('admin', 'admin@admin.com', 'admin1234', 0, 'admin'),
+('user1', 'user1@user.com', 'user1234', 6, 'user'),
+('user2', 'user1@user.com', 'user1234', 9, 'user'),
+('user3', 'user1@user.com', 'user1234', 7, 'user'),
+('user4', 'user1@user.com', 'user1234', 6, 'user'),
+('user5', 'user1@user.com', 'user1234', 4, 'user');
+
 -- --------------------------------------------------------
 
 --
@@ -127,7 +136,7 @@ VALUES
 
 -- --------------------------------------------
 
--- Table structure for table `color`
+-- Table structure for table `colors`
 --
 
 CREATE TABLE IF NOT EXISTS `colors` (
@@ -175,6 +184,15 @@ CREATE TABLE IF NOT EXISTS `auction` (
   FOREIGN KEY (`color_id`) REFERENCES `colors` (`color_id`),
   FOREIGN KEY (`size_id`) REFERENCES `sizes` (`size_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO `auction` (`item_name`, `item_description`, `category_id`, `username`, `starting_price`, `reserve_price`, `start_date`, `end_date`, `auction_status`, `image_path`, `material_id`, `item_condition`, `color_id`, `size_id`, `views`)
+VALUES
+('Handmade Scarf', 'A beautiful handmade scarf made of soft wool, perfect for winter.', 1, 'user1', 30, 20, '2024-11-01', '2024-11-20', 'active', 'images/scarf.jpg', 2, 'new', 3, 2, 15),
+('Vintage Jacket', 'Stylish vintage jacket from the 80s, in good condition.', 2, 'user2', 70, 50, '2024-11-05', '2024-11-25', 'active', 'images/jacket.jpg', 3, 'used', 5, 3, 25),
+('Modern Painting', 'A modern abstract painting with vibrant colors.', 3, 'user3', 200, 50, '2024-11-10', '2024-11-30', 'active', 'images/painting.jpg', 5, 'new', 6, NULL, 50),
+('Wooden doll', 'Handcrafted wooden chair with a rustic finish.', 4, 'user4', 35, 25, '2024-10-15', '2024-11-10', 'closed', 'images/chair.jpg', 5, 'new', 1, NULL, 30),
+('Designer Bag', 'Luxury designer bag in excellent condition, hardly used.', 5, 'user5', 50, 30, '2024-11-01', '2024-11-21', 'active', 'images/bag.jpg', 1, 'used', 2, NULL, 100);
+
 
 -- --------------------------------------------------------
 

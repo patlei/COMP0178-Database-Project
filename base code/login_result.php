@@ -4,48 +4,66 @@ include 'connection.php';
 
 session_start();
 
-// If the user is already logged in, redirect to the home page
+// If the user is already logged in, redirect to the appropriate page
 if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
-    header("Location: index.php");
-    exit; // Make sure no further code is executed after the redirect
+    if ($_SESSION['accountType'] === 'admin') {
+        header("Location: admin_page.php");
+    } else {
+        header("Location: index.php");
+    }
+    exit;
 }
 
-// Handle the login form submission
+// Handle login form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Extract username and password from POST data
+    // Get the username and password from the form submission
     $username = isset($_POST['username']) ? $_POST['username'] : '';
     $password = isset($_POST['password']) ? $_POST['password'] : '';
 
-    // Validate input (ensure both username and password are provided)
+    // Check if input fields are empty
     if (empty($username) || empty($password)) {
         $error_message = "Please enter both username and password.";
     } else {
-        // Prepare SQL query to find the user by username
+        // Query to get user information
         $query = "SELECT * FROM users WHERE username = ? LIMIT 1";
         $stmt = $conn->prepare($query);
-        $stmt->bind_param("s", $username); // 's' denotes a string
+        $stmt->bind_param("s", $username);
         $stmt->execute();
         $result = $stmt->get_result();
 
-        // Check if the user exists
+        // Check if user exists
         if ($result->num_rows > 0) {
             $user = $result->fetch_assoc();
 
-            // Check if the provided password matches the stored hash using password_verify
-            if (password_verify($password, $user['password'])) {
-                // Successful login, set session variables
-                $_SESSION['logged_in'] = true;
-                $_SESSION['username'] = $user['username'];
-                
-                // Redirect to home page after successful login
-                header("Location: index.php");
-                exit; // Make sure no further code is executed after the redirect
+            // Validate password based on account type
+            if ($user['accountType'] === 'user') {
+                // For regular users, use password_verify for hashed passwords
+                if (password_verify($password, $user['password'])) {
+                    // Set session variables for successful login
+                    $_SESSION['logged_in'] = true;
+                    $_SESSION['username'] = $user['username'];
+                    $_SESSION['accountType'] = $user['accountType'];
+                    header("Location: index.php");
+                    exit;
+                } else {
+                    $error_message = "Invalid username or password.";
+                }
+            } elseif ($user['accountType'] === 'admin') {
+                // For admin users, use direct password comparison (if stored in plain text)
+                if ($password === $user['password']) {
+                    // Set session variables for successful login
+                    $_SESSION['logged_in'] = true;
+                    $_SESSION['username'] = $user['username'];
+                    $_SESSION['accountType'] = $user['accountType'];
+                    header("Location: admin_page.php");
+                    exit;
+                } else {
+                    $error_message = "Invalid username or password.";
+                }
             } else {
-                // Password does not match
-                $error_message = "Invalid username or password.";
+                $error_message = "Invalid account type.";
             }
         } else {
-            // User not found
             $error_message = "Invalid username or password.";
         }
 
@@ -56,16 +74,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 $conn->close();
 ?>
 
+<!-- HTML for the Login Form -->
 <div class="container">
     <h2 class="my-3">Login to your account</h2>
 
-    <!-- Show error message if login fails -->
+    <!-- Display error message if login fails -->
     <?php if (isset($error_message)): ?>
         <div class="alert alert-danger"><?php echo $error_message; ?></div>
     <?php endif; ?>
 
     <!-- Login form -->
-    <form method="POST" action="login_result.php">
+    <form method="POST" action="">
         <div class="form-group row">
             <label for="username" class="col-sm-2 col-form-label text-right">Username</label>
             <div class="col-sm-10">
