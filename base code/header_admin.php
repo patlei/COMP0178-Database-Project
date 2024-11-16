@@ -30,6 +30,21 @@ if ($_SESSION['logged_in'] && isset($_SESSION['username'])) {
   
   <!-- Custom CSS file -->
   <link rel="stylesheet" href="css/custom.css">
+
+  <!-- Additional Inline CSS to Ensure Full Width -->
+  <style>
+      /* Ensure navbar spans the full width */
+      .navbar {
+          width: 100%;
+      }
+      /* Reset any potential padding/margin issues */
+      body, html {
+          padding: 0;
+          margin: 0;
+          width: 100%;
+      }
+  </style>
+  
   <title>Knitty Gritty</title>
 </head>
 
@@ -37,67 +52,75 @@ if ($_SESSION['logged_in'] && isset($_SESSION['username'])) {
 
 <!-- Top Navbar -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <a class="navbar-brand" href="index.php" style="display: flex; align-items: center;">
-      <img src="../icon.jpg" alt="Knitty Gritty Logo" style="height: 60px; width: auto; margin-right: 10px;">
-      <span class="store-title">Knitty Gritty</span>
-  </a>
+  <div class="container-fluid"> <!-- container-fluid for full width -->
+    <a class="navbar-brand d-flex align-items-center" href="index.php">
+        <img src="../icon.jpg" alt="Knitty Gritty Logo" style="height: 60px; width: auto; margin-right: 10px;">
+        <span class="store-title">Knitty Gritty</span>
+    </a>
 
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-  <div class="collapse navbar-collapse" id="navbarContent">
-    <ul class="navbar-nav ml-auto">
-      <!-- Search Form -->
-      <li class="nav-item mx-2">
-        <form class="form-inline" method="GET" action="browse.php">
-          <input class="form-control mr-sm-2" type="text" name="keyword" placeholder="Search listings" aria-label="Search">
-          <button class="btn btn-outline-success" type="submit">Search</button>
-        </form>
-      </li>
-
-      <?php if ($_SESSION['logged_in']): ?>
-        <!-- Notification Icon -->
-        <li class="nav-item mx-2">
-          <a class="nav-link" href="notifications.php"><i class="fa fa-bell"></i></a>
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav ml-auto">
+        <!-- Search Form -->
+        <li class="nav-item">
+          <form class="form-inline my-2 my-lg-0" method="GET" action="browse.php">
+            <input class="form-control mr-sm-2" type="text" name="keyword" placeholder="Search listings" aria-label="Search">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+          </form>
         </li>
-        
-        <!-- User Greeting Dropdown -->
-        <li class="nav-item dropdown mx-2">
-          <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fa fa-user"></i> <?php echo $greeting_message; ?>
-          </a>
-          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
-            <a class="dropdown-item" href="profile.php">My Profile</a>
-            <a class="dropdown-item" href="settings.php">Settings</a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="logout.php">Logout</a>
-          </div>
-        </li>
-      <?php endif; ?>
-    </ul>
+
+        <?php if ($_SESSION['logged_in']): ?>
+          <!-- Notification Icon -->
+          <li class="nav-item mx-2">
+            <a class="nav-link" href="notifications.php"><i class="fa fa-bell"></i></a>
+          </li>
+          
+          <!-- User Greeting Dropdown -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <i class="fa fa-user"></i> <?php echo htmlspecialchars("Welcome back, " . $_SESSION['username'] . "!"); ?>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+              <a class="dropdown-item" href="profile.php">My Profile</a>
+              <a class="dropdown-item" href="settings.php">Settings</a>
+              <div class="dropdown-divider"></div>
+              <a class="dropdown-item" href="logout.php">Logout</a>
+            </div>
+          </li>
+        <?php endif; ?>
+      </ul>
+    </div>
   </div>
 </nav>
 
 <!-- Admin Navigation Bar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="collapse navbar-collapse" id="siteNavbar">
-    <ul class="navbar-nav">
-      <li class="nav-item mx-1">
-        <a class="nav-link <?php echo ($_SERVER['PHP_SELF'] == '/browse.php') ? 'active' : ''; ?>" href="browse.php">Browse</a>
-      </li>
-      <li class="nav-item mx-1">
-        <a class="nav-link" href="admin_users.php">Users</a>
-      </li>
-      <li class="nav-item mx-1">
-        <a class="nav-link" href="admin_auctions.php">Auctions</a>
-      </li>
-    </ul>
+  <div class="container-fluid"> <!-- container-fluid for full width -->
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#adminNavbar" aria-controls="adminNavbar" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="adminNavbar">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link <?php echo ($_SERVER['PHP_SELF'] == '/browse.php') ? 'active' : ''; ?>" href="browse.php">Browse</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <?php echo ($_SERVER['PHP_SELF'] == '/admin_users.php') ? 'active' : ''; ?>" href="admin_users.php">Users</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <?php echo ($_SERVER['PHP_SELF'] == '/admin_auctions.php') ? 'active' : ''; ?>" href="admin_auctions.php">Auctions</a>
+        </li>
+      </ul>
+    </div>
   </div>
 </nav>
 
 <!-- Include Bootstrap and JavaScript dependencies -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
