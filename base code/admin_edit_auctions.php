@@ -55,7 +55,14 @@ $sizes = $conn->query("SELECT size_id, size FROM sizes")->fetch_all(MYSQLI_ASSOC
             <label for="auctionTitle" class="col-sm-2 col-form-label text-right">Title of auction</label>
             <div class="col-sm-10">
                 <input type="text" class="form-control" id="auctionTitle" name="item_name" value="<?php echo htmlspecialchars($auction['item_name'] ?? ''); ?>" placeholder="e.g. Black mountain bike">
-                <small class="form-text text-muted">A short description of the item you're selling, which will display in listings.</small>
+            </div>
+        </div>
+
+        <!-- Item Description -->
+        <div class="form-group row">
+            <label for="itemDescription" class="col-sm-2 col-form-label text-right">Item Description</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="auctionTitle" name="item_name" value="<?php echo htmlspecialchars($auction['item_description'] ?? ''); ?>" placeholder="e.g. Black mountain bike">
             </div>
         </div>
 
