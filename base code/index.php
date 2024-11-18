@@ -1,4 +1,15 @@
 <?php
+
+session_start(); // Start the session to access user data
+
+// Check if the user is logged in and if they are an admin
+if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
+    if (isset($_SESSION['accountType']) && $_SESSION['accountType'] === 'admin') {
+        header("Location: admin_page.php");
+        exit;
+    }
+}
+
 // Include the header and database connection files
 include_once("header.php");
 include_once("connection.php");
