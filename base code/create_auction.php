@@ -170,7 +170,7 @@ if (!$color_result) {
           <label for="auctionImage" class="col-sm-2 col-form-label text-right">Image path</label>
           <div class="col-sm-10">
             <input type="text" class="form-control" id="auctionImage" name="auctionImage">
-            <small id="imageHelp" class="form-text text-muted"> Optional. Provide an image path to an image you would like to upload</small>
+            <small id="imageHelp" class="form-text text-muted"> Optional. Provide an image title of an image you would like to upload</small>
           </div>
         </div>
         <div class="form-group row">
