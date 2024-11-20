@@ -41,10 +41,10 @@ INSERT INTO users (username, email, password, average_rating, accountType)
 VALUES 
 ('admin', 'admin@admin.com', 'admin1234', 0, 'admin'),
 ('user1', 'user1@user.com', 'user1234', 6, 'user'),
-('user2', 'user1@user.com', 'user1234', 9, 'user'),
-('user3', 'user1@user.com', 'user1234', 7, 'user'),
-('user4', 'user1@user.com', 'user1234', 6, 'user'),
-('user5', 'user1@user.com', 'user1234', 4, 'user');
+('user2', 'user2@user.com', 'user1234', 9, 'user'),
+('user3', 'user3@user.com', 'user1234', 7, 'user'),
+('user4', 'user4@user.com', 'user1234', 6, 'user'),
+('user5', 'user5@user.com', 'user1234', 4, 'user');
 
 -- --------------------------------------------------------
 
