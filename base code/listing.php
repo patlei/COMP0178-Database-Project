@@ -2,6 +2,7 @@
 include_once("header.php");
 include_once("connection.php");
 require_once("utilities.php");
+include_once("config.php");
 // Set PHP's default timezone to UTC
 date_default_timezone_set('UTC');
 
@@ -29,16 +30,16 @@ if (isset($_SESSION['error_message'])) {
 
 
 // Get the auction ID from the URL parameter
-if (!isset($_GET['auction_id'])) {
+if (!isset($_GET['auction_id']) || empty($_GET['auction_id']) || !is_numeric($_GET['auction_id'])) {
   echo "No auction selected!";
   exit;
 }
 
-$item_id = $_GET['auction_id'];
+$auction_id = intval($_GET['auction_id']);
 
 // Query to fetch the auction details along with category, size, material, color, condition, and views
-$sql = "SELECT a.item_name, a.item_description, a.category_id, a.starting_price, a.reserve_price, a.end_date, a.auction_status,
-               a.image_path, a.material_id, a.item_condition, a.color_id, a.size_id, a.views,
+$sql = "SELECT a.item_name, a.item_description, a.starting_price, a.reserve_price, a.end_date, a.auction_status,
+               a.image_path, a.item_condition, a.views,
                c.category_name, s.size, m.material, co.color
         FROM auction a
         LEFT JOIN categories c ON a.category_id = c.category_id
@@ -46,8 +47,9 @@ $sql = "SELECT a.item_name, a.item_description, a.category_id, a.starting_price,
         LEFT JOIN materials m ON a.material_id = m.material_id
         LEFT JOIN colors co ON a.color_id = co.color_id
         WHERE a.auction_id = ?";
+
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $item_id);
+$stmt->bind_param("i", $auction_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -56,29 +58,29 @@ if ($result->num_rows === 0) {
     exit;
 }
 
-$auction = $result->fetch_assoc();
+$auction = $result->fetch_assoc();  // Fetch the auction data here
 
-// Extract auction details and associated values
+// Extract auction details and associated values with default handling if missing
 $title = $auction['item_name'];
 $description = $auction['item_description'];
-$category = $auction['category_name'];
-$size = $auction['size'];
-$material = $auction['material'];
-$color = $auction['color'];
+$category = !empty($auction['category_name']) ? $auction['category_name'] : 'Not specified';
+$size = !empty($auction['size']) ? $auction['size'] : 'Not specified';
+$material = !empty($auction['material']) ? $auction['material'] : 'Not specified';
+$color = !empty($auction['color']) ? $auction['color'] : 'Not specified';
 $condition = $auction['item_condition'];
 $views = $auction['views'];
 $starting_price = $auction['starting_price'];
 $reserve_price = $auction['reserve_price'];
 $end_time = $auction['end_date'];
 $auction_status = $auction['auction_status'];
-$image_path = $auction['image_path'];
+$image_path = IMAGE_BASE_PATH . $auction['image_path'];
 
 $stmt->close();
 
 // Query to get the highest bid and the username of the highest bidder
 $query = "SELECT bid_amount, username FROM bids WHERE auction_id = ? ORDER BY bid_amount DESC LIMIT 1";
 $stmt = $conn->prepare($query);
-$stmt->bind_param("i", $item_id);
+$stmt->bind_param("i", $auction_id);
 $stmt->execute();
 $stmt->bind_result($current_price, $highest_bidder);
 $stmt->fetch();
@@ -93,7 +95,7 @@ if ($current_price === null) {
 // Query to count the number of bids for this auction
 $query_bids = "SELECT COUNT(*) FROM bids WHERE auction_id = ?";
 $stmt_bids = $conn->prepare($query_bids);
-$stmt_bids->bind_param("i", $item_id);
+$stmt_bids->bind_param("i", $auction_id);
 $stmt_bids->execute();
 $stmt_bids->bind_result($num_bids);
 $stmt_bids->fetch();
@@ -108,8 +110,6 @@ if ($now < $end_time) {
     $time_remaining = ' (in ' . display_time_remaining($time_to_end) . ')';
 } 
 
-
-
 // Check if the user is logged in 
 if (isset($_SESSION['username'])) {
     $username = $_SESSION['username']; // Get the username from the session
@@ -118,7 +118,7 @@ if (isset($_SESSION['username'])) {
    // Query to check if the user is watching this auction
     $query = "SELECT COUNT(*) FROM watchlist WHERE username = ? AND auction_id = ?";
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("si", $username, $item_id); 
+    $stmt->bind_param("si", $username, $auction_id); 
     $stmt->execute();
     $stmt->bind_result($count);
     $stmt->fetch();
@@ -163,7 +163,8 @@ if (isset($_SESSION['username'])) {
 <div class="row"> <!-- Row for item image and description -->
     <div class="col-sm-4"> <!-- Left column for image -->
       <?php if (!empty($image_path)): ?>
-        <img src="<?php echo($image_path); ?>" alt="Auction Item Image" class="img-fluid">
+        <img src="<?php echo htmlspecialchars($image_path); ?>" alt="Auction Item Image" class="img-fluid">
+
       <?php else: ?>
         <p>No image available for this auction.</p>
       <?php endif; ?>
@@ -261,7 +262,7 @@ if (isset($_SESSION['username'])) {
 function addToWatchlist(button) {
   $.ajax('watchlist_funcs.php', {
     type: "POST",
-    data: { functionname: 'add_to_watchlist', arguments: <?php echo json_encode($item_id); ?> },
+    data: { functionname: 'add_to_watchlist', arguments: <?php echo json_encode($auction_id); ?> },
     success: function(response) {
       var obj = JSON.parse(response);  // Parse the JSON response
       console.log(obj);  // Debugging
@@ -284,7 +285,7 @@ function addToWatchlist(button) {
 function removeFromWatchlist(button) {
   $.ajax('watchlist_funcs.php', {
     type: "POST",
-    data: { functionname: 'remove_from_watchlist', arguments: <?php echo json_encode($item_id); ?> },
+    data: { functionname: 'remove_from_watchlist', arguments: <?php echo json_encode($auction_id); ?> },
     success: function(response) {
       var obj = JSON.parse(response);  // Parse the JSON response
       console.log(obj);  // Debugging
