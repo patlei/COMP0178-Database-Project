@@ -105,7 +105,7 @@ if ($_SESSION['logged_in'] && isset($_SESSION['username'])) {
     <div class="collapse navbar-collapse" id="adminNavbar">
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link <?php echo ($_SERVER['PHP_SELF'] == '/browse.php') ? 'active' : ''; ?>" href="browse.php">Browse</a>
+          <a class="nav-link <?php echo ($_SERVER['PHP_SELF'] == '/admin_browse.php') ? 'active' : ''; ?>" href="admin_browse.php">Browse</a>
         </li>
         <li class="nav-item">
           <a class="nav-link <?php echo ($_SERVER['PHP_SELF'] == '/admin_users.php') ? 'active' : ''; ?>" href="admin_users.php">Users</a>
