@@ -1,4 +1,5 @@
 <?php
+include_once("config.php");
 
 session_start(); // Start the session to access user data
 
@@ -41,6 +42,7 @@ $ending_soon_result = $conn->query($ending_soon_sql);
     </div>
 </div>
 
+
 <!-- Popular Listings Section -->
 <div class="container mt-5 popular-listings">
     <h3>Popular Listings</h3>
@@ -48,9 +50,12 @@ $ending_soon_result = $conn->query($ending_soon_sql);
         <?php
         if ($popular_result && $popular_result->num_rows > 0) {
             while ($row = $popular_result->fetch_assoc()) {
+                $image_path = $row['image_path'];
+                // Construct full image path
+                $full_image_path = IMAGE_BASE_PATH . $image_path;
                 echo '<div class="col-3">
                         <div class="card h-100">
-                            <img src="' . htmlspecialchars($row['image_path']) . '" class="card-img-top" alt="' . htmlspecialchars($row['item_name']) . '">
+                            <img src="' . $full_image_path . '" class="card-img-top" alt="' . htmlspecialchars($row['item_name']) . '">
                             <div class="card-body">
                                 <h5 class="card-title">' . htmlspecialchars($row['item_name']) . '</h5>
                                 <p class="card-text"><strong>Starting Price: £' . number_format($row['starting_price'], 2) . '</strong></p>
@@ -101,9 +106,12 @@ $ending_soon_result = $conn->query($ending_soon_sql);
         if ($ending_soon_result && $ending_soon_result->num_rows > 0) {
             while ($row = $ending_soon_result->fetch_assoc()) {
                 $end_date = new DateTime($row['end_date']);
+                $image_path = $row['image_path'];
+                // Construct full image path
+                $full_image_path = IMAGE_BASE_PATH . $image_path;
                 echo '<div class="col-3">
                         <div class="card h-100">
-                            <img src="' . htmlspecialchars($row['image_path']) . '" class="card-img-top" alt="' . htmlspecialchars($row['item_name']) . '">
+                            <img src="' . $full_image_path . '" class="card-img-top" alt="' . htmlspecialchars($row['item_name']) . '">
                             <div class="card-body">
                                 <h5 class="card-title">' . htmlspecialchars($row['item_name']) . '</h5>
                                 <p class="card-text"><strong>Starting Price: £' . number_format($row['starting_price'], 2) . '</strong></p>
