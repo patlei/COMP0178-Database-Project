@@ -15,18 +15,18 @@ session_start();
 //   exit;
 // }
 
-// Check if there is a success message and display it
-if (isset($_SESSION['success_message'])) {
-  echo '<div class="alert alert-success">' . $_SESSION['success_message'] . '</div>';
-  // Unset the success message so it doesn't show again on page refresh
-  unset($_SESSION['success_message']);
-}
+// // Check if there is a success message and display it
+// if (isset($_SESSION['success_message'])) {
+//   echo '<div class="alert alert-success">' . $_SESSION['success_message'] . '</div>';
+//   // Unset the success message so it doesn't show again on page refresh
+//   unset($_SESSION['success_message']);
+// }
 
-// Optionally, display any error messages
-if (isset($_SESSION['error_message'])) {
-  echo '<div class="alert alert-danger">' . $_SESSION['error_message'] . '</div>';
-  unset($_SESSION['error_message']);
-}
+// // Optionally, display any error messages
+// if (isset($_SESSION['error_message'])) {
+//   echo '<div class="alert alert-danger">' . $_SESSION['error_message'] . '</div>';
+//   unset($_SESSION['error_message']);
+// }
 
 
 // Get the auction ID from the URL parameter
@@ -38,7 +38,7 @@ if (!isset($_GET['auction_id']) || empty($_GET['auction_id']) || !is_numeric($_G
 $auction_id = intval($_GET['auction_id']);
 
 // Query to fetch the auction details along with category, size, material, color, condition, and views
-$sql = "SELECT a.item_name, a.item_description, a.starting_price, a.reserve_price, a.end_date, a.auction_status,
+$sql = "SELECT a.item_name, a.item_description, a.username, a.starting_price, a.reserve_price, a.end_date, a.auction_status,
                a.image_path, a.item_condition, a.views,
                c.category_name, s.size, m.material, co.color
         FROM auction a
@@ -74,6 +74,7 @@ $reserve_price = $auction['reserve_price'];
 $end_time = $auction['end_date'];
 $auction_status = $auction['auction_status'];
 $image_path = IMAGE_BASE_PATH . $auction['image_path'];
+$auction_username = $auction['username'];
 
 $stmt->close();
 
@@ -134,6 +135,39 @@ if (isset($_SESSION['username'])) {
 } else {
     $has_session = false; // If there is no session, the user is not logged in
     $watching = false; // Cannot be watching anything if not logged in
+}
+?>
+
+
+<?php 
+//'Auctions by the same user'
+// Construct SQL query with conditions and dynamic values
+$sql = "SELECT  a.auction_id, a.item_name, a.item_description, 
+               IFNULL(hb.highest_bid, a.starting_price) AS current_price, 
+               a.category_id, a.end_date, a.image_path,
+               a.item_condition, m.material, c.color, s.size, a.views 
+        FROM auction a
+        LEFT JOIN highest_bids hb ON a.auction_id = hb.auction_id
+        LEFT JOIN materials m ON a.material_id = m.material_id
+        LEFT JOIN colors c ON a.color_id = c.color_id
+        LEFT JOIN sizes s ON a.size_id = s.size_id
+        WHERE a.auction_status = 'active'
+        AND a.auction_id IN (
+          SELECT a2.auction_id
+          FROM auction a2
+          WHERE username = '$auction_username'
+        )
+        AND a.auction_id != $auction_id 
+        LIMIT 10";
+      
+
+        
+// Execute the SQL query
+$result2 = $conn->query($sql);
+
+// Check if the query execution resulted in an error
+if (!$result2) {
+    echo "<div class='alert alert-danger'>Oops! Something went wrong while fetching the results. Please try again later.</div>";
 }
 ?>
 
@@ -236,7 +270,37 @@ if (isset($_SESSION['username'])) {
 
 </div> <!-- End of row #2 -->
 
-
+    <!-- Auctions by the same user -->
+<div class="container mt-5 sameuser-listings">
+<h3>Other auctions by this user:</h3>
+<div class="scrolling-wrapper row flex-row flex-nowrap mt-4 pb-4 pt-2">
+    <?php if ($result2->num_rows == 0): ?>
+      <p>No results found... Try again with different keywords or filters.</p>
+  <?php else: ?>
+      <div class="row">
+          <?php
+          // Loop through each result and display it using the utility function
+          while ($row = $result2->fetch_assoc()) {
+            $image_path = $row['image_path'];
+            // Construct full image path
+            $full_image_path = IMAGE_BASE_PATH . $image_path;
+            echo '<div class="col-3">
+                    <div class="card h-100">
+                        <img src="' . $full_image_path . '" class="card-img-top" alt="' . htmlspecialchars($row['item_name']) . '">
+                        <div class="card-body">
+                            <h5 class="card-title">' . htmlspecialchars($row['item_name']) . '</h5>
+                            <p class="card-text"><strong>Starting Price: £' . number_format($row['starting_price'], 2) . '</strong></p>
+                            <p class="text-muted">Views: ' . number_format($row['views']) . '</p>
+                        </div>
+                        <div class="card-footer text-center">
+                            <a href="listing.php?auction_id=' . $row['auction_id'] . '" class="btn btn-primary">View Listing</a>
+                        </div>
+                    </div>
+                </div>';}
+            ?>
+        </div>
+  <?php endif; ?>
+</div>
 
 <?php include_once("footer.php")?>
 
