@@ -2,6 +2,8 @@
 include 'connection.php'; 
 ############### ADDING IMAGES OPTION not great yet#####################
 session_start();
+// Set PHP's default timezone to UTC
+date_default_timezone_set('UTC');
 ?>
 
 <div class="container my-5">
@@ -27,10 +29,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $auctionImage = isset($_POST['auctionImage']) ? $_POST['auctionImage'] : '';
 #image_path	
     // Get today's date for start_date
-    $auctionStartDate = date('Y-m-d');  // Current date in 'YYYY-MM-DD' format
+    $auctionStartDate = date('Y-m-d H:i:s');  // Current date and time
+    $auctionEndDate = date('Y-m-d H:i:s', strtotime($auctionEndDate));  // Convert to datetime format
 
     // Determine auction status
-    $auctionStatus = (strtotime($auctionEndDate) > time()) ? 'active' : 'closed';
+    if ($auctionStartDate > $auctionEndDate) {
+        // Auction has ended
+        $auctionStatus = 'closed';
+    } else {
+        // Auction is ongoing
+        $auctionStatus = 'active';
+    }
 
     // Validate the form fields
     if (empty($auctionTitle) || empty($auctionDetails) || empty($auctionCategory) || empty($auctionStartPrice) || empty($auctionEndDate)) {

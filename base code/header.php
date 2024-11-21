@@ -1,4 +1,10 @@
 <?php
+include_once('connection.php');
+include_once('utilities.php');
+
+// Update auction status
+update_auction_status($conn);
+
 session_start();
 
 // Default session variables if not logged in

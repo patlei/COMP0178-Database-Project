@@ -13,7 +13,7 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
 // Include the header and database connection files
 include_once("header.php");
 include_once("connection.php");
-require("utilities.php");
+require_once("utilities.php");
 
 // Fetch "Popular Listings" based on the highest number of views.
 $popular_sql = "SELECT auction_id, item_name, image_path, starting_price, views 
@@ -57,7 +57,7 @@ $ending_soon_result = $conn->query($ending_soon_sql);
                                 <p class="text-muted">Views: ' . number_format($row['views']) . '</p>
                             </div>
                             <div class="card-footer text-center">
-                                <a href="listing.php?item_id=' . $row['auction_id'] . '" class="btn btn-primary">View Listing</a>
+                                <a href="listing.php?auction_id=' . $row['auction_id'] . '" class="btn btn-primary">View Listing</a>
                             </div>
                         </div>
                     </div>';
@@ -110,7 +110,7 @@ $ending_soon_result = $conn->query($ending_soon_sql);
                                 <p class="text-muted">Ends on: ' . $end_date->format('d M Y H:i') . '</p>
                             </div>
                             <div class="card-footer text-center">
-                                <a href="listing.php?item_id=' . $row['auction_id'] . '" class="btn btn-warning">Bid Now</a>
+                                <a href="listing.php?auction_id=' . $row['auction_id'] . '" class="btn btn-warning">Bid Now</a>
                             </div>
                         </div>
                     </div>';
