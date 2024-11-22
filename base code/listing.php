@@ -74,7 +74,7 @@ $reserve_price = $auction['reserve_price'];
 $end_time = $auction['end_date'];
 $auction_status = $auction['auction_status'];
 $image_path = IMAGE_BASE_PATH . $auction['image_path'];
-$auction_username = $auction['username'];
+$seller_username = $auction['username'];
 
 $stmt->close();
 
@@ -155,7 +155,7 @@ $sql = "SELECT  a.auction_id, a.item_name, a.item_description,
         AND a.auction_id IN (
           SELECT a2.auction_id
           FROM auction a2
-          WHERE username = '$auction_username'
+          WHERE username = '$seller_username'
         )
         AND a.auction_id != $auction_id 
         LIMIT 10";
@@ -171,6 +171,53 @@ if (!$result2) {
 }
 ?>
 
+
+<?php
+
+// Register the sale in the database
+if ($auction_status === 'closed' && $num_bids > 0) {
+  // Check if auction_id is in table sales
+  $check_sale = "SELECT COUNT(*) FROM sales WHERE auction_id = ?";
+  $stmt = $conn->prepare($check_sale);
+  if ($stmt) {
+      // Bind parameter
+      $stmt->bind_param("d", $auction_id);
+      
+      // Execute the query
+      $stmt->execute();
+      $stmt->bind_result($count);
+      $stmt->fetch();
+      $stmt->close();
+
+      if ($count == 0) {
+          // if auction_id not in sales yet, proceed to insert
+          $add_sale = "INSERT INTO sales (auction_id, seller_username, buyer_username, sale_price)
+                      VALUES (?, ?, ?, ?)";
+          $stmt = $conn->prepare($add_sale);
+          if ($stmt) {
+              // Bind parameters
+              $stmt->bind_param("dssd", $auction_id, $seller_username, $highest_bidder, $current_price);
+
+              // Execute the statement
+              if ($stmt->execute()) {
+                  echo "Sale successfully registered!";
+              } else {
+                  echo "Error inserting data: " . $stmt->error;
+              }
+
+              // Close the prepared statement
+              $stmt->close();
+          } else {
+              echo "Error preparing statement: " . $conn->error;
+          }
+      } // Don't need to inform the user that the sale has been registered previously
+  } else {
+      echo "Error preparing check statement: " . $conn->error;
+  }
+}
+
+       
+?>
 
 <div class="container">
 
@@ -238,10 +285,77 @@ if (!$result2) {
   <?php else: ?>
         <!-- Auction ended with a sale -->
         This auction ended <?php echo date_format($end_time, 'j M H:i'); ?><br>
-        Sold for £<?php echo number_format($current_price, 2); ?>
-    <?php endif; ?>
+        Sold for £<?php echo number_format($current_price, 2); ?> to User: <?php echo($highest_bidder)?>
+        <!--Display review form button for seller and buyer -->
+        <?php // Check if the user has already submitted a review for this auction
+        $query_review_check = "SELECT COUNT(*) FROM review WHERE auction_id = ? AND review_author = ?";
+        $stmt_review_check = $conn->prepare($query_review_check);
+        $stmt_review_check->bind_param("is", $auction_id, $username); // 'i' for integer, 's' for string
+        $stmt_review_check->execute();
+        $stmt_review_check->bind_result($review_count);
+        $stmt_review_check->fetch();
+        $stmt_review_check->close();
+        // If review_count > 0, user has already submitted a review for this auction
+        $has_reviewed = ($review_count > 0);
+        ?>
+        <?php if ($username === $seller_username || $username === $highest_bidder): ?>
+          <?php if (!$has_reviewed): // Only show the review button if the user hasn't reviewed ?>
+            <div style="margin-top: 10px;">
+              <a href="review.php?auction_id=<?php echo $auction_id; ?>&seller_username=<?php echo urlencode($seller_username); ?>&highest_bidder=<?php echo urlencode($highest_bidder); ?>" class="btn btn-primary">Add Review</a>
+            </div>
+          <?php endif; ?>
+        <?php endif; ?>
+        <?php
+        // Register the sale in the database
+        if ($auction_status === 'closed' && $num_bids > 0) {
+          // Check if auction_id is in table sales
+          $check_sale = "SELECT COUNT(*) FROM sales WHERE auction_id = ?";
+          $stmt = $conn->prepare($check_sale);
+          if ($stmt) {
+              // Bind parameter
+              $stmt->bind_param("d", $auction_id);
+      
+              // Execute the query
+              $stmt->execute();
+              $stmt->bind_result($count);
+              $stmt->fetch();
+              $stmt->close();
+
+              if ($count == 0) {
+                // if auction_id not in sales yet, proceed to insert
+                  $add_sale = "INSERT INTO sales (auction_id, seller_username, buyer_username, sale_price)
+                                VALUES (?, ?, ?, ?)";
+                  $stmt = $conn->prepare($add_sale);
+                  if ($stmt) {
+                      // Bind parameters
+                      $stmt->bind_param("dssd", $auction_id, $seller_username, $highest_bidder, $current_price);
+
+                      // Execute the statement
+                      if ($stmt->execute()) {
+                          echo "Sale successfully registered!";
+                      } else {
+                          echo "Error inserting data: " . $stmt->error;
+                      }
+
+                      // Close the prepared statement
+                      $stmt->close();
+                    } else {
+                      echo "Error preparing statement: " . $conn->error;
+                  }
+                  // Execute the SQL query to insert the sale
+                  $sale = $conn->query($addsale);
+                  // Check if the query execution resulted in an error
+                  if (!$sale) {
+                    echo "<div class='alert alert-danger'>Oops! Something went wrong while fetching the results. Please try again later.</div>";
+                  };
+              } // Don't need to inform the user that the sale has been registered previously
+          } else {
+              echo "Error preparing check statement: " . $conn->error;
+          }
+        } endif
+        ?>
 <?php else: ?>
-     Auction ends <?php echo(date_format($end_time, 'j M H:i') . $time_remaining) ?></p>  
+     Auction ends <?php echo(date_format($end_time, 'j M H:i') . $time_remaining) ?></>  
     <p class="lead">Current bid: £<?php echo(number_format($current_price, 2)) ?></p>
     <p><strong>Number of Bids:</strong> <?php echo($num_bids); ?></p>
     <!-- Displaying message for the user if their bid is the highest -->
@@ -289,7 +403,7 @@ if (!$result2) {
                         <img src="' . $full_image_path . '" class="card-img-top" alt="' . htmlspecialchars($row['item_name']) . '">
                         <div class="card-body">
                             <h5 class="card-title">' . htmlspecialchars($row['item_name']) . '</h5>
-                            <p class="card-text"><strong>Starting Price: £' . number_format($row['starting_price'], 2) . '</strong></p>
+                            <p class="card-text"><strong>Current Price: £' . number_format($row['current_price'], 2) . '</strong></p>
                             <p class="text-muted">Views: ' . number_format($row['views']) . '</p>
                         </div>
                         <div class="card-footer text-center">

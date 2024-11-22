@@ -283,21 +283,6 @@ CREATE TABLE IF NOT EXISTS `sales` (
 
 -- --------------------------------------------------------
 
---
--- Table structure for table `purchases`
---
-
-CREATE TABLE IF NOT EXISTS `purchases` (
-  `purchase_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `auction_id` int(10) UNSIGNED NOT NULL,
-  `buyer_username` varchar(30) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
-  `purchase_price` int(10) UNSIGNED NOT NULL,
-  PRIMARY KEY (`purchase_id`),
-  FOREIGN KEY (`auction_id`) REFERENCES `auction` (`auction_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (`buyer_username`) REFERENCES `users` (`username`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
 
 -- Table structure for table 'watchlist' 
 
@@ -342,6 +327,22 @@ BEGIN
 END$$
 
 DELIMITER ;
+-- ------------------------------------------------------
+
+-- Table structure for table `review`
+
+CREATE TABLE IF NOT EXISTS `review` (
+  `review_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `auction_id` int(10) UNSIGNED NOT NULL,
+  `review_author` varchar(30) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `reviewed_user` varchar(30) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `review` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `rating` TINYINT UNSIGNED NOT NULL CHECK (`rating` BETWEEN 1 AND 5),
+  PRIMARY KEY (`watch_id`),
+  FOREIGN KEY (`auction_id`) REFERENCES `auction` (`auction_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`review_author`) REFERENCES `users` (`username`),
+  FOREIGN KEY (`reviewed_user`) REFERENCES `users` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
