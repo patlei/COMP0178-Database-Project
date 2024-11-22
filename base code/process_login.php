@@ -32,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                 // Redirect based on account type
                 if ($user['accountType'] === 'admin') {
-                    header("Location: admin_page.php");
+                    header("Location: admin_browse.php");
                 } else {
                     header("Location: browse.php");
                 }

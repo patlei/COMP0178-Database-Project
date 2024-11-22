@@ -526,5 +526,23 @@ $max_page = ($results_per_page > 0) ? ceil($num_results / $results_per_page) : 1
     </div>
 </div>
 
+<!-- Include jQuery and Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 
-<?php include_once("footer.php"); ?>
+<!-- Debug Dropdown Functionality -->
+<script>
+    $(document).ready(function () {
+        console.log("Dropdowns are initialized.");
+        $('.dropdown-toggle').dropdown(); // Ensure dropdowns are activated
+    });
+</script>
+
+</body>
+</html>
+
+<?php
+$conn->close(); // Close database connection
+?>
+
+

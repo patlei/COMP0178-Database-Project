@@ -80,7 +80,7 @@ if ($_SESSION['logged_in'] && isset($_SESSION['username'])) {
         </li>
       <?php else: ?>
         <li class="nav-item mx-2">
-          <button type="button" class="btn nav-link" data-toggle="modal" data-target="#loginModal">Login</button>
+          <a href="login.php" class="nav-link">Login</a>
         </li>
       <?php endif; ?>
     </ul>
@@ -114,54 +114,6 @@ if ($_SESSION['logged_in'] && isset($_SESSION['username'])) {
     </ul>
   </div>
 </nav>
-
-<!-- Login Modal -->
-<div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-
-      <!-- Modal Header -->
-      <div class="modal-header">
-        <h5 class="modal-title" id="loginModalLabel">Login</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-
-      <!-- Modal Body: Form to login -->
-      <div class="modal-body">
-        <form method="POST" action="login_result.php">
-          <!-- Username field -->
-          <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" required>
-          </div>
-
-          <!-- Password field -->
-          <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
-          </div>
-
-          <!-- Remember Me -->
-          <div class="form-group form-check">
-            <input type="checkbox" class="form-check-input" id="rememberMe">
-            <label class="form-check-label" for="rememberMe">Remember Me</label>
-          </div>
-
-          <!-- Submit button -->
-          <button type="submit" class="btn btn-primary form-control">Sign in</button>
-        </form>
-
-        <!-- Register link -->
-        <div class="text-center mt-3">
-          Don't have an account? <a href="register.php">Create one</a>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</div>
 
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
