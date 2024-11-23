@@ -184,6 +184,8 @@ CREATE TABLE IF NOT EXISTS `auction` (
   FOREIGN KEY (`material_id`) REFERENCES `materials` (`material_id`),
   FOREIGN KEY (`color_id`) REFERENCES `colors` (`color_id`),
   FOREIGN KEY (`size_id`) REFERENCES `sizes` (`size_id`)
+      ON DELETE CASCADE 
+      ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Inserting dummy data into the auction table
@@ -225,8 +227,10 @@ CREATE TABLE IF NOT EXISTS `bids` (
   `bid_amount` int(10) UNSIGNED NOT NULL DEFAULT 0,
   `bid_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`bid_id`),
-  FOREIGN KEY (`auction_id`) REFERENCES `auction` (`auction_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`auction_id`) REFERENCES `auction` (`auction_id`),
   FOREIGN KEY (`username`) REFERENCES `users` (`username`)
+      ON DELETE CASCADE 
+      ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -242,7 +246,9 @@ CREATE TABLE IF NOT EXISTS `highest_bids` (
   `highest_bid` DECIMAL(10, 2) NOT NULL,
   `last_bidder` VARCHAR(30) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
   PRIMARY KEY (`auction_id`),
-  FOREIGN KEY (`auction_id`) REFERENCES `auction` (`auction_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  FOREIGN KEY (`auction_id`) REFERENCES `auction` (`auction_id`) 
+      ON DELETE CASCADE 
+      ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
@@ -261,6 +267,8 @@ CREATE TABLE IF NOT EXISTS `closed_auctions` (
   PRIMARY KEY (`win_id`),
   FOREIGN KEY (`auction_id`) REFERENCES `auction` (`auction_id`),
   FOREIGN KEY (`bid_id`) REFERENCES `bids` (`bid_id`)
+      ON DELETE CASCADE 
+      ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -279,25 +287,12 @@ CREATE TABLE IF NOT EXISTS `sales` (
   FOREIGN KEY (`auction_id`) REFERENCES `auction` (`auction_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY (`seller_username`) REFERENCES `users` (`username`),
   FOREIGN KEY (`buyer_username`) REFERENCES `users` (`username`)
+      ON DELETE CASCADE 
+      ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
---
--- Table structure for table `purchases`
---
-
-CREATE TABLE IF NOT EXISTS `purchases` (
-  `purchase_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `auction_id` int(10) UNSIGNED NOT NULL,
-  `buyer_username` varchar(30) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
-  `purchase_price` int(10) UNSIGNED NOT NULL,
-  PRIMARY KEY (`purchase_id`),
-  FOREIGN KEY (`auction_id`) REFERENCES `auction` (`auction_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (`buyer_username`) REFERENCES `users` (`username`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
 
 -- Table structure for table 'watchlist' 
 
@@ -309,6 +304,8 @@ CREATE TABLE IF NOT EXISTS `watchlist` (
   UNIQUE KEY `unique_watchlist` (`username`, `auction_id`),
   FOREIGN KEY (`username`) REFERENCES `users` (`username`),
   FOREIGN KEY (`auction_id`) REFERENCES `auction` (`auction_id`)
+      ON DELETE CASCADE 
+      ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -322,8 +319,10 @@ CREATE TABLE IF NOT EXISTS `user_views` (
   `view_count` int(10) UNSIGNED NOT NULL DEFAULT 1,
   PRIMARY KEY (`view_id`),
   UNIQUE KEY `unique_user_views` (`username`, `auction_id`),
-  FOREIGN KEY (`username`) REFERENCES `users` (`username`) ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (`auction_id`) REFERENCES `auction` (`auction_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  FOREIGN KEY (`username`) REFERENCES `users` (`username`),
+  FOREIGN KEY (`auction_id`) REFERENCES `auction` (`auction_id`) 
+      ON DELETE CASCADE 
+      ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -342,6 +341,47 @@ BEGIN
 END$$
 
 DELIMITER ;
+-- ------------------------------------------------------
+
+-- Table structure for table `review`
+
+CREATE TABLE IF NOT EXISTS `review` (
+  `review_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `auction_id` int(10) UNSIGNED NOT NULL,
+  `review_author` varchar(30) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `reviewed_user` varchar(30) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `review` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `rating` TINYINT UNSIGNED NOT NULL CHECK (`rating` BETWEEN 1 AND 5),
+  PRIMARY KEY (`review_id`),
+  FOREIGN KEY (`auction_id`) REFERENCES `auction` (`auction_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`review_author`) REFERENCES `users` (`username`),
+  FOREIGN KEY (`reviewed_user`) REFERENCES `users` (`username`)
+      ON DELETE CASCADE 
+      ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+-- Table structure for table `profile`
+
+CREATE TABLE IF NOT EXISTS `profile` (
+    `profile_id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `username` VARCHAR(30) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+    `bank_account` VARCHAR(50) NOT NULL,
+    `delivery_address` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+    PRIMARY KEY (`profile_id`),
+    FOREIGN KEY (`username`) REFERENCES `users`(`username`) 
+        ON DELETE CASCADE 
+        ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO `profile` (`username`, `bank_account`, `delivery_address`)
+VALUES
+    ('user1', '1234567890123456', '123 Main St, Springfield'),
+    ('user2', '9876543210987654', '456 Elm St, Shelbyville'),
+    ('user3', '5678901234567890', '789 Oak St, Capital City');
+
+
 
 -- --------------------------------------------------------
 
