@@ -45,8 +45,21 @@ if (!$result) {
     <?php endif; ?>
 </div>
 
+<!-- Include jQuery and Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Debug Dropdown Functionality -->
+<script>
+    $(document).ready(function () {
+        console.log("Dropdowns are initialized.");
+        $('.dropdown-toggle').dropdown(); // Ensure dropdowns are activated
+    });
+</script>
+
+</body>
+</html>
+
 <?php
-// Close the database connection
-$conn->close();
-include_once("footer.php");
+$conn->close(); // Close database connection
 ?>

@@ -3,8 +3,6 @@ include_once("header.php");
 include_once("connection.php"); 
 require_once("utilities.php");  
 
-// Start the session to check the user credentials
-session_start();
 
 // Check if the user is logged in
 if (!isset($_SESSION['username'])) {
@@ -29,32 +27,36 @@ $stmt = $conn->prepare($query);
 $stmt->bind_param("s", $username);  // Bind the username to the query
 $stmt->execute();
 $result = $stmt->get_result();
+?>
 
-// Check if there are any results
-if ($result->num_rows > 0) {
-    echo '<h2>Your Bids</h2>';
-    echo '<ul class="list-group">';  // Start a list for the auction items
+<div class="container mt-5">
+    <h2 class="mb-4">Your Bids</h2> <!-- Add spacing below the header -->
+    <?php
+    // Check if there are any results
+    if ($result->num_rows > 0) {
+        echo '<ul class="list-group">';  // Start a list for the auction items
 
-    // Loop through the results and use the print_listing_li function to display them
-    while ($row = $result->fetch_assoc()) {
-        $item_id = $row['auction_id'];
-        $title = $row['item_name'];
-        $desc = $row['item_description'];
-        $price = $row['current_price'];
-        $num_bids = $row['num_bids'];
-        $end_time = new DateTime($row['end_date']);  // Convert end_time to DateTime object
+        // Loop through the results and use the print_listing_li function to display them
+        while ($row = $result->fetch_assoc()) {
+            $item_id = $row['auction_id'];
+            $title = $row['item_name'];
+            $desc = $row['item_description'];
+            $price = $row['current_price'];
+            $num_bids = $row['num_bids'];
+            $end_time = new DateTime($row['end_date']);  // Convert end_time to DateTime object
 
-        // Use the print_listing_li function to display each auction
-        print_listing_li($item_id, $title, $desc, $price, $num_bids, $end_time);
+            // Use the print_listing_li function to display each auction
+            print_listing_li($item_id, $title, $desc, $price, $num_bids, $end_time);
+        }
+
+        echo '</ul>';  // End the list
+    } else {
+        echo "<p>You have not placed any bids yet.</p>";
     }
 
-    echo '</ul>';  // End the list
-} else {
-    echo "<p>You have not placed any bids yet.</p>";
-}
+    $stmt->close();  
+    $conn->close();  
+    ?>
+</div>
 
-$stmt->close();  
-$conn->close();  
-
-include_once("footer.php"); 
-?>
+<?php include_once("footer.php"); ?>

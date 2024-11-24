@@ -3,11 +3,6 @@
 include_once("connection.php");    // Database connection
 include_once("header_admin.php");  // Admin header
 
-// // Ensure the user is an admin
-// if (!isset($_SESSION['account_type']) || $_SESSION['account_type'] != 'admin') {
-//     header("Location: login.php");
-//     exit();
-// }
 
 // Check if username is provided in the URL
 if (!isset($_GET['username'])) {
@@ -91,12 +86,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </form>
 </div>
 
+<!-- Include jQuery and Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Debug Dropdown Functionality -->
+<script>
+    $(document).ready(function () {
+        console.log("Dropdowns are initialized.");
+        $('.dropdown-toggle').dropdown(); // Ensure dropdowns are activated
+    });
+</script>
 
 </body>
 </html>
 
 <?php
-$conn->close();
+$conn->close(); // Close database connection
 ?>

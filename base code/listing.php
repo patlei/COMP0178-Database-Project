@@ -7,7 +7,7 @@ include_once("config.php");
 date_default_timezone_set('UTC');
 
 // // Start the session
-session_start(); 
+
 
 // // Check if the user is logged in
 // if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
@@ -483,3 +483,4 @@ function removeFromWatchlist(button) {
 }
 
 </script>
+

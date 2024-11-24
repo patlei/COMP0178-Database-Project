@@ -80,7 +80,7 @@ if ($_SESSION['logged_in'] && isset($_SESSION['username'])) {
         </li>
       <?php else: ?>
         <li class="nav-item mx-2">
-          <button type="button" class="btn nav-link" data-toggle="modal" data-target="#loginModal">Login</button>
+          <a href="login.php" class="nav-link">Login</a>
         </li>
       <?php endif; ?>
     </ul>
@@ -88,16 +88,20 @@ if ($_SESSION['logged_in'] && isset($_SESSION['username'])) {
 </nav>
 
 <!-- Second Navbar for Site Navigation -->
+<!-- Second Navbar for Site Navigation -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#siteNavbar" aria-controls="siteNavbar" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
   <div class="collapse navbar-collapse" id="siteNavbar">
     <ul class="navbar-nav">
+      <!-- Browse Tab (Available to Everyone) -->
       <li class="nav-item mx-1">
         <a class="nav-link <?php echo ($_SERVER['PHP_SELF'] == '/browse.php') ? 'active' : ''; ?>" href="browse.php">Browse</a>
       </li>
+      
       <?php if ($_SESSION['logged_in']): ?>
+        <!-- Tabs for Logged-in Users -->
         <li class="nav-item mx-1">
           <a class="nav-link" href="mybids.php">My Bids</a>
         </li>
@@ -110,58 +114,21 @@ if ($_SESSION['logged_in'] && isset($_SESSION['username'])) {
         <li class="nav-item ml-3">
           <a class="nav-link btn btn-outline-light" href="create_auction.php">+ Create Auction</a>
         </li>
+
+        <?php if ($_SESSION['account_type'] == 'admin'): ?>
+          <!-- Admin-Specific Tabs -->
+          <li class="nav-item mx-1">
+            <a class="nav-link <?php echo ($_SERVER['PHP_SELF'] == '/admin_users.php') ? 'active' : ''; ?>" href="admin_users.php">Users</a>
+          </li>
+          <li class="nav-item mx-1">
+            <a class="nav-link <?php echo ($_SERVER['PHP_SELF'] == '/admin_auctions.php') ? 'active' : ''; ?>" href="admin_auctions.php">Auctions</a>
+          </li>
+        <?php endif; ?>
       <?php endif; ?>
     </ul>
   </div>
 </nav>
 
-<!-- Login Modal -->
-<div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-
-      <!-- Modal Header -->
-      <div class="modal-header">
-        <h5 class="modal-title" id="loginModalLabel">Login</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-
-      <!-- Modal Body: Form to login -->
-      <div class="modal-body">
-        <form method="POST" action="login_result.php">
-          <!-- Username field -->
-          <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" required>
-          </div>
-
-          <!-- Password field -->
-          <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
-          </div>
-
-          <!-- Remember Me -->
-          <div class="form-group form-check">
-            <input type="checkbox" class="form-check-input" id="rememberMe">
-            <label class="form-check-label" for="rememberMe">Remember Me</label>
-          </div>
-
-          <!-- Submit button -->
-          <button type="submit" class="btn btn-primary form-control">Sign in</button>
-        </form>
-
-        <!-- Register link -->
-        <div class="text-center mt-3">
-          Don't have an account? <a href="register.php">Create one</a>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</div>
 
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
