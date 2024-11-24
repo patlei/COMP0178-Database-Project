@@ -220,7 +220,7 @@ $max_page = ($results_per_page > 0) ? ceil($num_results / $results_per_page) : 1
                 <button class="btn btn-secondary" type="button" data-toggle="collapse" data-target="#filterOptions" aria-expanded="false" aria-controls="filterOptions">
                     Filter Options
                 </button>
-                <button type="button" class="btn btn-light ml-2" onclick="window.location.href='browse.php'">
+                <button type="button" class="btn btn-light ml-2" onclick="window.location.href='admin_browse.php'">
                     Clear Filters
                 </button>
             </div>
@@ -418,7 +418,7 @@ $max_page = ($results_per_page > 0) ? ceil($num_results / $results_per_page) : 1
             // Next page link
             if ($curr_page < $max_page) {
                 echo '<li class="page-item">
-                        <a class="page-link" href="browse.php?' . $querystring . 'page=' . ($curr_page + 1) . '" aria-label="Next">
+                        <a class="page-link" href="admin_browse.php?' . $querystring . 'page=' . ($curr_page + 1) . '" aria-label="Next">
                             <span aria-hidden="true"><i class="fa fa-arrow-right"></i></span>
                             <span class="sr-only">Next</span>
                         </a>

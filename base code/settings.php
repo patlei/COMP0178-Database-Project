@@ -10,34 +10,43 @@ if (!isset($_SESSION['username'])) {
 
 $current_username = $_SESSION['username'];
 
-// Fetch user and profile details
-$user_sql = "SELECT username, email FROM users WHERE username = ?";
-$user_stmt = $conn->prepare($user_sql);
-$user_stmt->bind_param("s", $current_username);
-$user_stmt->execute();
-$user_result = $user_stmt->get_result();
+// Fetch user and profile details function
+function fetchUserData($conn, $current_username)
+{
+    // Fetch user details
+    $user_sql = "SELECT username, email FROM users WHERE username = ?";
+    $user_stmt = $conn->prepare($user_sql);
+    $user_stmt->bind_param("s", $current_username);
+    $user_stmt->execute();
+    $user_result = $user_stmt->get_result();
 
-if ($user_result->num_rows === 0) {
-    echo "User not found.";
-    exit();
+    if ($user_result->num_rows === 0) {
+        echo "User not found.";
+        exit();
+    }
+    $user = $user_result->fetch_assoc();
+
+    // Fetch profile details
+    $profile_sql = "SELECT bank_account, delivery_address FROM profile WHERE username = ?";
+    $profile_stmt = $conn->prepare($profile_sql);
+    $profile_stmt->bind_param("s", $current_username);
+    $profile_stmt->execute();
+    $profile_result = $profile_stmt->get_result();
+
+    if ($profile_result->num_rows === 0) {
+        echo "Profile information not found.";
+        exit();
+    }
+    $profile = $profile_result->fetch_assoc();
+
+    return [$user, $profile];
 }
-$user = $user_result->fetch_assoc();
 
-$profile_sql = "SELECT bank_account, delivery_address FROM profile WHERE username = ?";
-$profile_stmt = $conn->prepare($profile_sql);
-$profile_stmt->bind_param("s", $current_username);
-$profile_stmt->execute();
-$profile_result = $profile_stmt->get_result();
-
-if ($profile_result->num_rows === 0) {
-    echo "Profile information not found.";
-    exit();
-}
-$profile = $profile_result->fetch_assoc();
+// Fetch user data
+list($user, $profile) = fetchUserData($conn, $current_username);
 
 // Handle form submission
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $new_username = trim($_POST['username']);
     $new_email = trim($_POST['email']);
     $new_password = trim($_POST['password']);
     $confirm_password = trim($_POST['confirm_password']);
@@ -45,8 +54,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $delivery_address = trim($_POST['delivery_address']);
 
     // Validate form data
-    if (empty($new_username) || empty($new_email)) {
-        $error = "Username and email cannot be empty.";
+    if (empty($new_email)) {
+        $error = "Email cannot be empty.";
     } elseif (!filter_var($new_email, FILTER_VALIDATE_EMAIL)) {
         $error = "Invalid email format.";
     } elseif (!empty($new_password) && $new_password !== $confirm_password) {
@@ -55,38 +64,36 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         // Begin transaction to ensure consistency
         $conn->begin_transaction();
         try {
-            // Update users table
-            $update_user_sql = "UPDATE users SET username = ?, email = ?" . (!empty($new_password) ? ", password = ?" : "") . " WHERE username = ?";
+            // Update email and optionally password in users table
+            $update_user_sql = "UPDATE users SET email = ?" . (!empty($new_password) ? ", password = ?" : "") . " WHERE username = ?";
             $user_stmt = $conn->prepare($update_user_sql);
 
             if (!empty($new_password)) {
                 $hashed_password = password_hash($new_password, PASSWORD_BCRYPT);
-                $user_stmt->bind_param("ssss", $new_username, $new_email, $hashed_password, $current_username);
+                $user_stmt->bind_param("sss", $new_email, $hashed_password, $current_username);
             } else {
-                $user_stmt->bind_param("sss", $new_username, $new_email, $current_username);
+                $user_stmt->bind_param("ss", $new_email, $current_username);
             }
 
             if (!$user_stmt->execute()) {
-                throw new Exception("Error updating personal information: " . $user_stmt->error);
+                throw new Exception("Error updating email or password: " . $user_stmt->error);
             }
 
             // Update profile table
             $update_profile_sql = "UPDATE profile SET bank_account = ?, delivery_address = ? WHERE username = ?";
             $profile_stmt = $conn->prepare($update_profile_sql);
-            $profile_stmt->bind_param("sss", $bank_account, $delivery_address, $new_username);
+            $profile_stmt->bind_param("sss", $bank_account, $delivery_address, $current_username);
 
             if (!$profile_stmt->execute()) {
                 throw new Exception("Error updating profile information: " . $profile_stmt->error);
             }
 
-            // Update session username if changed
-            if ($new_username !== $current_username) {
-                $_SESSION['username'] = $new_username;
-            }
-
             // Commit transaction
             $conn->commit();
             $success = "Your settings have been updated successfully.";
+
+            // Re-fetch updated data
+            list($user, $profile) = fetchUserData($conn, $current_username);
         } catch (Exception $e) {
             // Rollback transaction on error
             $conn->rollback();
@@ -117,10 +124,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <?php endif; ?>
 
     <form method="POST" action="settings.php">
-        <!-- Username -->
+        <!-- Username (Read-only) -->
         <div class="form-group">
             <label for="username">Username</label>
-            <input type="text" class="form-control" id="username" name="username" value="<?php echo htmlspecialchars($user['username']); ?>" required>
+            <input type="text" class="form-control" id="username" name="username" value="<?php echo htmlspecialchars($user['username']); ?>" readonly>
         </div>
 
         <!-- Email -->
@@ -131,7 +138,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         <!-- Password -->
         <div class="form-group">
-            <label for="password">New Password (Leave blank to keep current password)</label>
+            <label for="password">New Password (Optional)</label>
             <input type="password" class="form-control" id="password" name="password">
         </div>
 

@@ -88,16 +88,20 @@ if ($_SESSION['logged_in'] && isset($_SESSION['username'])) {
 </nav>
 
 <!-- Second Navbar for Site Navigation -->
+<!-- Second Navbar for Site Navigation -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#siteNavbar" aria-controls="siteNavbar" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
   <div class="collapse navbar-collapse" id="siteNavbar">
     <ul class="navbar-nav">
+      <!-- Browse Tab (Available to Everyone) -->
       <li class="nav-item mx-1">
         <a class="nav-link <?php echo ($_SERVER['PHP_SELF'] == '/browse.php') ? 'active' : ''; ?>" href="browse.php">Browse</a>
       </li>
+      
       <?php if ($_SESSION['logged_in']): ?>
+        <!-- Tabs for Logged-in Users -->
         <li class="nav-item mx-1">
           <a class="nav-link" href="mybids.php">My Bids</a>
         </li>
@@ -110,10 +114,21 @@ if ($_SESSION['logged_in'] && isset($_SESSION['username'])) {
         <li class="nav-item ml-3">
           <a class="nav-link btn btn-outline-light" href="create_auction.php">+ Create Auction</a>
         </li>
+
+        <?php if ($_SESSION['account_type'] == 'admin'): ?>
+          <!-- Admin-Specific Tabs -->
+          <li class="nav-item mx-1">
+            <a class="nav-link <?php echo ($_SERVER['PHP_SELF'] == '/admin_users.php') ? 'active' : ''; ?>" href="admin_users.php">Users</a>
+          </li>
+          <li class="nav-item mx-1">
+            <a class="nav-link <?php echo ($_SERVER['PHP_SELF'] == '/admin_auctions.php') ? 'active' : ''; ?>" href="admin_auctions.php">Auctions</a>
+          </li>
+        <?php endif; ?>
       <?php endif; ?>
     </ul>
   </div>
 </nav>
+
 
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

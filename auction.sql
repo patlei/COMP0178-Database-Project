@@ -40,9 +40,9 @@ CREATE TABLE IF NOT EXISTS `users` (
 INSERT INTO users (username, email, password, average_rating, accountType)
 VALUES 
 ('admin', 'admin@admin.com', 'admin1234', 0, 'admin'),
-('user1', 'user1@user.com', 'user1234', 6, 'user'),
-('user2', 'user2@user.com', 'user1234', 9, 'user'),
-('user3', 'user3@user.com', 'user1234', 7, 'user'),
+('ola', 'ola@ola.com', 'user1234', 6, 'user'),
+('rachel', 'rachel@rachel.com', 'user1234', 9, 'user'),
+('jingyi', 'jingyi@jingyi.com', 'user1234', 7, 'user'),
 ('user4', 'user4@user.com', 'user1234', 6, 'user'),
 ('user5', 'user5@user.com', 'user1234', 4, 'user');
 
@@ -193,26 +193,26 @@ CREATE TABLE IF NOT EXISTS `auction` (
 INSERT INTO `auction` (`item_name`, `item_description`, `category_id`, `username`, `starting_price`, `reserve_price`, `start_date`, `end_date`, `auction_status`, `image_path`, `material_id`, `item_condition`, `color_id`, `size_id`, `views`)
 VALUES
 -- Active Listings
-('Cozy Wool Sweater', 'A warm and cozy hand-knitted sweater perfect for chilly days.', 5, 'user1', 40, 60, '2024-11-11', '2024-12-04', 'active', 'test.jpg', 2, 'new', 1, 3, 5),
-('Amigurumi Elephant', 'A cute and soft crochet elephant perfect for kids.', 12, 'user2', 20, 30, '2024-11-12', '2024-12-05', 'active', 'test.jpg', 1, 'new', 3, 6, 3),
-('Crochet Blanket Pattern', 'DIY crochet pattern for a beautiful blanket. Instant digital download.', 13, 'user3', 10, 10, '2024-11-15', '2024-12-06', 'active', 'test.jpg', 2, 'new', 7, 6, 8),
-('Cozy Knit Blanket', 'A warm and comfortable hand-knitted blanket. Perfect for cold evenings and snuggling up.', 13, 'user4', 30, 50, '2024-11-10', '2024-12-07', 'active', 'test.jpg', 2, 'new', 7, 4, 15),
-('Colourful Crochet Shawl', 'A vibrant shawl featuring a beautiful crochet pattern. Lightweight and perfect for any occasion.', 2, 'user5', 20, 40, '2024-11-08', '2024-12-08', 'active', 'test.jpg', 1, 'new', 11, 3, 12),
-('Soft Wool Socks', 'Handmade wool socks that will keep your feet toasty during winter. Unisex, one size fits all.', 9, 'user1', 10, 25, '2024-11-09', '2024-12-09', 'active', 'test.jpg', 2, 'new', 1, 6, 8),
-('Baby Blue Cardigan', 'A charming knitted cardigan in baby blue, perfect for layering in the winter months.', 5, 'user2', 25, 45, '2024-11-11', '2024-12-10', 'active', 'test.jpg', 4, 'new', 7, 2, 20),
-('Granny Square Throw', 'A stunning granny square throw blanket with mixed colours. Ideal as a gift or home decor.', 13, 'user3', 40, 60, '2024-11-07', '2024-12-11', 'active', 'test.jpg', 5, 'used', 11, 4, 10),
-('Handmade Crochet Toy Bear', 'Adorable crochet bear made from 100% cotton yarn. Safe for children and makes a perfect cuddly friend.', 12, 'user4', 15, 35, '2024-11-09', '2024-12-12', 'active', 'test.jpg', 1, 'new', 4, 3, 18),
-('Wool Mittens', 'Cozy wool mittens that are perfect for cold weather. Hand-knitted with love.', 8, 'user5', 12, 20, '2024-11-10', '2024-12-13', 'active', 'test.jpg', 2, 'new', 3, 1, 13),
-('Crochet Baby Blanket', 'Handmade baby blanket made from soft yarn, perfect as a baby shower gift.', 13, 'user1', 25, 35, '2024-11-13', '2024-12-14', 'active', 'test.jpg', 2, 'new', 8, 6, 9),
-('Knitted Wool Hat', 'A stylish knitted hat to keep you warm during winter.', 6, 'user2', 15, 25, '2024-11-14', '2024-12-15', 'active', 'test.jpg', 2, 'new', 7, 3, 11),
-('Rainbow Crochet Blanket', 'Colourful crochet blanket, perfect for adding some brightness to your room.', 13, 'user3', 50, 75, '2024-11-12', '2024-12-16', 'active', 'test.jpg', 1, 'new', 11, 4, 18),
-('Handmade Cotton Headband', 'A soft and comfortable handmade headband, perfect for daily use.', 6, 'user4', 8, 15, '2024-11-15', '2024-12-17', 'active', 'test.jpg', 1, 'new', 2, 6, 7),
-('Knit Fingerless Gloves', 'Hand-knitted fingerless gloves, perfect for staying warm while using your phone.', 8, 'user5', 18, 30, '2024-11-14', '2024-12-18', 'active', 'test.jpg', 2, 'new', 5, 2, 14),
+('Cozy Wool Sweater', 'A warm and cozy hand-knitted sweater perfect for chilly days.', 5, 'ola', 60, 40, '2024-11-11', '2024-12-04', 'active', 'test.jpg', 2, 'new', 1, 3, 5),
+('Amigurumi Elephant', 'A cute and soft crochet elephant perfect for kids.', 12, 'rachel', 30, 20, '2024-11-12', '2024-12-05', 'active', 'test.jpg', 1, 'new', 3, 6, 3),
+('Crochet Blanket Pattern', 'DIY crochet pattern for a beautiful blanket. Instant digital download.', 13, 'jingyi', 10, 10, '2024-11-15', '2024-12-06', 'active', 'test.jpg', 2, 'new', 7, 6, 8),
+('Cozy Knit Blanket', 'A warm and comfortable hand-knitted blanket. Perfect for cold evenings and snuggling up.', 13, 'user4', 50, 30, '2024-11-10', '2024-12-07', 'active', 'test.jpg', 2, 'new', 7, 4, 15),
+('Colourful Crochet Shawl', 'A vibrant shawl featuring a beautiful crochet pattern. Lightweight and perfect for any occasion.', 2, 'user5', 40, 20, '2024-11-08', '2024-12-08', 'active', 'test.jpg', 1, 'new', 11, 3, 12),
+('Soft Wool Socks', 'Handmade wool socks that will keep your feet toasty during winter. Unisex, one size fits all.', 9, 'ola', 25, 10, '2024-11-09', '2024-12-09', 'active', 'test.jpg', 2, 'new', 1, 6, 8),
+('Baby Blue Cardigan', 'A charming knitted cardigan in baby blue, perfect for layering in the winter months.', 5, 'rachel', 45, 25, '2024-11-11', '2024-12-10', 'active', 'test.jpg', 4, 'new', 7, 2, 20),
+('Granny Square Throw', 'A stunning granny square throw blanket with mixed colours. Ideal as a gift or home decor.', 13, 'jingyi', 60, 40, '2024-11-07', '2024-12-11', 'active', 'test.jpg', 5, 'used', 11, 4, 10),
+('Handmade Crochet Toy Bear', 'Adorable crochet bear made from 100% cotton yarn. Safe for children and makes a perfect cuddly friend.', 12, 'user4', 35, 15, '2024-11-09', '2024-12-12', 'active', 'test.jpg', 1, 'new', 4, 3, 18),
+('Wool Mittens', 'Cozy wool mittens that are perfect for cold weather. Hand-knitted with love.', 8, 'user5', 120, 20, '2024-11-10', '2024-12-13', 'active', 'test.jpg', 2, 'new', 3, 1, 13),
+('Crochet Baby Blanket', 'Handmade baby blanket made from soft yarn, perfect as a baby shower gift.', 13, 'ola', 35, 25, '2024-11-13', '2024-12-14', 'active', 'test.jpg', 2, 'new', 8, 6, 9),
+('Knitted Wool Hat', 'A stylish knitted hat to keep you warm during winter.', 6, 'rachel', 25, 15, '2024-11-14', '2024-12-15', 'active', 'test.jpg', 2, 'new', 7, 3, 11),
+('Rainbow Crochet Blanket', 'Colourful crochet blanket, perfect for adding some brightness to your room.', 13, 'jingyi', 75, 50, '2024-11-12', '2024-12-16', 'active', 'test.jpg', 1, 'new', 11, 4, 18),
+('Handmade Cotton Headband', 'A soft and comfortable handmade headband, perfect for daily use.', 6, 'user4', 15, 8, '2024-11-15', '2024-12-17', 'active', 'test.jpg', 1, 'new', 2, 6, 7),
+('Knit Fingerless Gloves', 'Hand-knitted fingerless gloves, perfect for staying warm while using your phone.', 8, 'user5', 30, 18, '2024-11-14', '2024-12-18', 'active', 'test.jpg', 2, 'new', 5, 2, 14),
 
 -- Closed listings
-('Vintage Wool Sweater', 'A vintage sweater made from wool. Slightly worn, but in good condition.', 5, 'user1', 30, 45, '2024-11-01', '2024-11-15', 'closed', 'test.jpg', 2, 'used', 1, 3, 25),
-('Crochet Pillow Set', 'A set of 2 handmade crochet pillows. Adds a cozy touch to your living room.', 14, 'user2', 40, 60, '2024-11-02', '2024-11-16', 'closed', 'test.jpg', 1, 'new', 7, 4, 30),
-('Acrylic Yarn Bundle', 'A bundle of colourful acrylic yarns, perfect for multiple DIY projects.', 3, 'user3', 20, 30, '2024-11-03', '2024-11-17', 'closed', 'test.jpg', 4, 'new', 11, 6, 22);
+('Vintage Wool Sweater', 'A vintage sweater made from wool. Slightly worn, but in good condition.', 5, 'ola', 45, 30, '2024-11-01', '2024-11-15', 'closed', 'test.jpg', 2, 'used', 1, 3, 25),
+('Crochet Pillow Set', 'A set of 2 handmade crochet pillows. Adds a cozy touch to your living room.', 14, 'rachel', 60, 40, '2024-11-02', '2024-11-16', 'closed', 'test.jpg', 1, 'new', 7, 4, 30),
+('Acrylic Yarn Bundle', 'A bundle of colourful acrylic yarns, perfect for multiple DIY projects.', 3, 'jingyi', 30, 20, '2024-11-03', '2024-11-17', 'closed', 'test.jpg', 4, 'new', 11, 6, 22);
 
 -- --------------------------------------------------------
 
@@ -290,6 +290,12 @@ CREATE TABLE IF NOT EXISTS `sales` (
       ON DELETE CASCADE 
       ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO `sales` (`auction_id`,`seller_username`,`buyer_username`,`sale_price`)
+VALUES
+(16,'ola','rachel',40),
+(17,'rachel','jingyi',50),
+(18,'jingyi','ola',25);
 
 -- --------------------------------------------------------
 
@@ -377,9 +383,11 @@ CREATE TABLE IF NOT EXISTS `profile` (
 
 INSERT INTO `profile` (`username`, `bank_account`, `delivery_address`)
 VALUES
-    ('user1', '1234567890123456', '123 Main St, Springfield'),
-    ('user2', '9876543210987654', '456 Elm St, Shelbyville'),
-    ('user3', '5678901234567890', '789 Oak St, Capital City');
+    ('ola', '1234567890123456', '123 Main St, Springfield'),
+    ('rachel', '9876543210987654', '456 Elm St, Shelbyville'),
+    ('jingyi', '5678901234567890', '789 Oak St, Capital City'),
+    ('user4', '3456783452345678', '792 oxford St, London'),
+    ('user5', '9876534523456666', '456 Refent St, London');
 
 
 
