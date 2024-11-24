@@ -163,7 +163,7 @@ $max_page = ($results_per_page > 0) ? ceil($num_results / $results_per_page) : 1
 
     <!-- Search Form (separate from the floating sidebar) -->
     <div id="searchSpecs" class="p-4 rounded shadow-sm mb-5" style="background-color: #f8f9fa; border: 1px solid #e3e6f0;">
-        <form method="get" action="browse.php">
+        <form method="get" action="admin_browse.php">
             <div class="row">
                 <div class="col-md-5 pr-0">
                     <div class="form-group">
@@ -366,7 +366,7 @@ $max_page = ($results_per_page > 0) ? ceil($num_results / $results_per_page) : 1
                         <div class='card h-100'>
                             <img src='" . $full_image_path . "' class='card-img-top' alt='Item Image' style='object-fit: cover; height: 200px;'>
                             <div class='card-body'>
-                                <h5 class='card-title'><a href='listing.php?auction_id=$auction_id'>$title</a></h5>
+                                <h5 class='card-title'><a href='admin_listing.php?auction_id=$auction_id'>$title</a></h5>
                                 <p class='card-text'>" . htmlspecialchars($description) . "</p>
                                 <p class='text-muted'>Current Bid Price: £" . number_format($current_price, 2) . "</p>
                                 <p class='text-muted'>End Date: " . $end_date->format('d M Y H:i') . "</p>
@@ -400,7 +400,7 @@ $max_page = ($results_per_page > 0) ? ceil($num_results / $results_per_page) : 1
             // Previous page link
             if ($curr_page > 1) {
                 echo '<li class="page-item">
-                        <a class="page-link" href="browse.php?' . $querystring . 'page=' . ($curr_page - 1) . '" aria-label="Previous">
+                        <a class="page-link" href="admin_browse.php?' . $querystring . 'page=' . ($curr_page - 1) . '" aria-label="Previous">
                             <span aria-hidden="true"><i class="fa fa-arrow-left"></i></span>
                             <span class="sr-only">Previous</span>
                         </a>
@@ -411,7 +411,7 @@ $max_page = ($results_per_page > 0) ? ceil($num_results / $results_per_page) : 1
             for ($i = 1; $i <= $max_page; $i++) {
                 $active_class = ($i == $curr_page) ? 'active' : '';
                 echo '<li class="page-item ' . $active_class . '">
-                        <a class="page-link" href="browse.php?' . $querystring . 'page=' . $i . '">' . $i . '</a>
+                        <a class="page-link" href="admin_browse.php?' . $querystring . 'page=' . $i . '">' . $i . '</a>
                     </li>';
             }
 
@@ -465,7 +465,7 @@ $max_page = ($results_per_page > 0) ? ceil($num_results / $results_per_page) : 1
                                 <div class="card-body">
                                     <h5 class="card-title">' . htmlspecialchars($rec_row['item_name']) . '</h5>
                                     <p class="card-text"><strong>Highest Bid: £' . number_format($rec_row['highest_bid'], 2) . '</strong></p>
-                                    <a href="listing.php?auction_id=' . $rec_row['auction_id'] . '" class="btn btn-primary">View Listing</a>
+                                    <a href="admin_listing.php?auction_id=' . $rec_row['auction_id'] . '" class="btn btn-primary">View Listing</a>
                                 </div>
                             </div>
                         </div>';
@@ -514,7 +514,7 @@ $max_page = ($results_per_page > 0) ? ceil($num_results / $results_per_page) : 1
                             <div class="card-body">
                                 <h5 class="card-title">' . htmlspecialchars($pop_row['item_name']) . '</h5>
                                 <p class="card-text"><strong>Highest Bid: £' . number_format($pop_row['highest_bid'], 2) . '</strong></p>
-                                <a href="listing.php?auction_id=' . $pop_row['auction_id'] . '" class="btn btn-primary">View Listing</a>
+                                <a href="admin_listing.php?auction_id=' . $pop_row['auction_id'] . '" class="btn btn-primary">View Listing</a>
                             </div>
                         </div>
                     </div>';

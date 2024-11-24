@@ -1,7 +1,7 @@
 <?php
 include_once("config.php");
 
-session_start(); // Start the session to access user data
+//session_start(); // Start the session to access user data
 
 // Check if the user is logged in and if they are an admin
 if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
