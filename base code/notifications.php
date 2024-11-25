@@ -168,20 +168,7 @@ echo '<div id="loading-spinner" class="spinner-border text-primary" role="status
             data: { notification_id: notificationId },
             success: function(response) {
                 if (response.trim() === 'success') {
-                    // Remove the 'list-group-item-primary' class to mark it visually as read
                     $(element).closest('.list-group-item').removeClass('list-group-item-primary');
-                    $(element).remove(); // Remove the "Mark as read" button
-                    // Update unread count if there's an element tracking the unread count
-                    let unreadCountElem = $('#unread-count');
-                    let currentCount = parseInt(unreadCountElem.attr('data-count'), 10);
-                    if (currentCount > 0) {
-                        currentCount -= 1;
-                        unreadCountElem.attr('data-count', currentCount);
-                        unreadCountElem.text(currentCount);
-                        if (currentCount === 0) {
-                            unreadCountElem.hide();
-                        }
-                    }
                 } else {
                     console.error('Failed to mark as read');
                 }
