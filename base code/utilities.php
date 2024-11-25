@@ -67,7 +67,6 @@ function print_listing_li($item_id, $title, $desc, $price, $num_bids, $end_time,
 }
 
 
-
 // Function to update auction status and notify sellers and buyers
 function update_auction_status($conn) {
   // Set PHP's default timezone to UTC
@@ -194,5 +193,4 @@ function update_watchlist_notifications($conn) {
       error_log("Failed to prepare the watchlist notification query: " . $conn->error);
   }
 }
-
 ?>

@@ -31,21 +31,46 @@ if ($conn->connect_error) {
     exit();
 }
 
-// Update all notifications for the logged-in user to mark them as read
-$update_sql = "UPDATE notifications SET is_read = 1 WHERE username = ?";
-$stmt = $conn->prepare($update_sql);
+// If a notification ID is provided, mark only that notification as read
+if (isset($_POST['notification_id'])) {
+    $notification_id = intval($_POST['notification_id']); // Ensure notification_id is an integer
 
-if ($stmt) {
-    $stmt->bind_param("s", $username);
-    
+    $update_sql = "UPDATE notifications SET is_read = 1 WHERE notification_id = ? AND username = ?";
+    $stmt = $conn->prepare($update_sql);
+
+    if ($stmt) {
+        $stmt->bind_param("is", $notification_id, $username);
+
+        // Execute the query and check for success
+        if ($stmt->execute()) {
+            echo "success"; // Send success response for AJAX
+        } else {
+            echo "failure"; // Send failure response for AJAX
+        }
+
+        $stmt->close();
+    } else {
+        echo "failure"; // Send failure response for AJAX if statement preparation fails
+    }
+
+    exit(); // End script to prevent further code execution
+}
+
+// If no notification ID is provided, mark all notifications as read
+$update_all_sql = "UPDATE notifications SET is_read = 1 WHERE username = ?";
+$stmt_all = $conn->prepare($update_all_sql);
+
+if ($stmt_all) {
+    $stmt_all->bind_param("s", $username);
+
     // Execute the query and check for success
-    if ($stmt->execute()) {
+    if ($stmt_all->execute()) {
         $_SESSION['success_message'] = "All notifications have been marked as read.";
     } else {
         $_SESSION['error_message'] = "Failed to mark all notifications as read. Please try again.";
     }
-    
-    $stmt->close();
+
+    $stmt_all->close();
 } else {
     // Prepare statement failed
     $_SESSION['error_message'] = "Failed to prepare statement to mark notifications as read. Please try again.";
