@@ -168,20 +168,7 @@ echo '<div id="loading-spinner" class="spinner-border text-primary" role="status
             data: { notification_id: notificationId },
             success: function(response) {
                 if (response.trim() === 'success') {
-                    // Remove the 'list-group-item-primary' class to mark it visually as read
                     $(element).closest('.list-group-item').removeClass('list-group-item-primary');
-                    $(element).remove(); // Remove the "Mark as read" button
-                    // Update unread count if there's an element tracking the unread count
-                    let unreadCountElem = $('#unread-count');
-                    let currentCount = parseInt(unreadCountElem.attr('data-count'), 10);
-                    if (currentCount > 0) {
-                        currentCount -= 1;
-                        unreadCountElem.attr('data-count', currentCount);
-                        unreadCountElem.text(currentCount);
-                        if (currentCount === 0) {
-                            unreadCountElem.hide();
-                        }
-                    }
                 } else {
                     console.error('Failed to mark as read');
                 }
@@ -196,39 +183,6 @@ echo '<div id="loading-spinner" class="spinner-border text-primary" role="status
         });
     }
 
-    // Set an interval to update the unread count every 30 seconds
-    setInterval(updateUnreadCount, 30000);
-
-    function updateUnreadCount() {
-    // Show the spinner before making the AJAX request
-    $('#loading-spinner').show();
-
-    $.ajax({
-        url: 'fetch_unread_count.php',
-        type: 'GET',
-        dataType: 'json',
-        success: function(data) {
-            if (data.unread_count !== undefined) {
-                let unreadCount = data.unread_count;
-                let badgeElem = $('#unread-count');
-
-                if (unreadCount > 0) {
-                    badgeElem.text(unreadCount);
-                    badgeElem.show();
-                } else {
-                    badgeElem.hide();
-                }
-            }
-            // Hide the spinner after the request completes successfully
-            $('#loading-spinner').hide();
-        },
-        error: function() {
-            console.error('Error fetching unread notifications count.');
-            // Hide the spinner even if there is an error
-            $('#loading-spinner').hide();
-        }
-    });
-}
 </script>
 
 <?php include_once("footer.php"); ?>
