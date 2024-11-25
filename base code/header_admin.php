@@ -14,6 +14,30 @@ session_regenerate_id(true);
 $greeting_message = $_SESSION['logged_in'] && isset($_SESSION['username']) 
     ? "Welcome back, " . htmlspecialchars($_SESSION['username']) . "!" 
     : "";
+
+// Include database connection
+include_once("connection.php");
+
+// Retrieve the logged-in username and set unread notifications count
+$unread_count = 0;
+
+if ($_SESSION['logged_in'] && isset($_SESSION['username'])) {
+    $username = $_SESSION['username'];
+
+    // Query to count the unread notifications for the logged-in user
+    $unread_count_sql = "SELECT COUNT(*) AS unread_count FROM notifications WHERE username = ? AND is_read = FALSE";
+    $stmt = $conn->prepare($unread_count_sql);
+    if ($stmt) {
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $stmt->bind_result($unread_count);
+        $stmt->fetch();
+        $stmt->close();
+    } else {
+        // You could log this error or handle it appropriately
+        error_log("Failed to prepare statement for unread notifications count: " . $conn->error);
+    }
+}
 ?>
 
 <!doctype html>
@@ -34,6 +58,10 @@ $greeting_message = $_SESSION['logged_in'] && isset($_SESSION['username'])
 </head>
 
 <body>
+
+<div id="loading-spinner" style="display: none;">
+    <i class="fa fa-spinner fa-spin"></i> Loading...
+</div>
 
 <!-- Top Navbar -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -58,9 +86,14 @@ $greeting_message = $_SESSION['logged_in'] && isset($_SESSION['username'])
         </li>
 
         <?php if ($_SESSION['logged_in']): ?>
-          <!-- Notification Icon -->
+          <!-- Notification Icon with unread badge -->
           <li class="nav-item mx-2">
-            <a class="nav-link" href="notifications.php"><i class="fa fa-bell"></i></a>
+              <a class="nav-link position-relative" href="notifications.php" title="<?php echo $unread_count > 0 ? $unread_count . ' unread notifications' : 'No new notifications'; ?>">
+                  <i class="fa fa-bell"></i>
+                  <?php if ($unread_count > 0): ?>
+                      <span id="unread-count" class="badge badge-danger position-absolute" style="top: -10px; right: -10px;"><?php echo $unread_count; ?></span>
+                  <?php endif; ?>
+              </a>
           </li>
           
           <!-- User Dropdown -->
