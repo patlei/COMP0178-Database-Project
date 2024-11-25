@@ -38,7 +38,7 @@ $greeting_message = $_SESSION['logged_in'] && isset($_SESSION['username'])
 <!-- Top Navbar -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container-fluid">
-    <a class="navbar-brand d-flex align-items-center" href="index.php">
+    <a class="navbar-brand d-flex align-items-center" href="index.php"> 
       <img src="../icon.jpg" alt="Knitty Gritty Logo" style="height: 60px; width: auto; margin-right: 10px;">
       <span class="store-title">Knitty Gritty</span>
     </a>
