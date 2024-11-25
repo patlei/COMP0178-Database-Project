@@ -64,8 +64,8 @@ function print_listing_li($item_id, $title, $desc, $price, $num_bids, $end_time)
 }
 
 
-// Function to update auction status and notify sellers
-function update_auction_status_with_notifications($conn) {
+// Function to update auction status and notify sellers and buyers
+function update_auction_status($conn) {
   // Set PHP's default timezone to UTC
   date_default_timezone_set('UTC');
 
@@ -96,7 +96,7 @@ function update_auction_status_with_notifications($conn) {
           $highest_bid = $row['highest_bid'];
           $last_bidder = $row['last_bidder'];
 
-          // Determine auction outcome and prepare notification message
+          // Determine auction outcome and prepare notification message for seller
           if ($highest_bid === null) {
               // No bids were placed
               $message = "Your auction for Auction ID $auction_id ended without any bids being placed.";
@@ -106,6 +106,16 @@ function update_auction_status_with_notifications($conn) {
           } else {
               // Successful sale
               $message = "Congratulations! Your auction for Auction ID $auction_id ended successfully with the highest bid of £" . number_format($highest_bid, 2) . " to User: $last_bidder.";
+
+              // Notify the buyer that they have won the auction
+              $buyer_message = "Congratulations! You won the auction for Auction ID $auction_id with a bid of £" . number_format($highest_bid, 2) . ".";
+              $buyer_notification_query = "INSERT INTO notifications (username, auction_id, message, type) VALUES (?, ?, ?, 'bidding')";
+              $buyer_notification_stmt = $conn->prepare($buyer_notification_query);
+              if ($buyer_notification_stmt) {
+                  $buyer_notification_stmt->bind_param("sis", $last_bidder, $auction_id, $buyer_message);
+                  $buyer_notification_stmt->execute();
+                  $buyer_notification_stmt->close();
+              }
           }
 
           // Insert the notification for the seller
@@ -180,5 +190,4 @@ function update_watchlist_notifications($conn) {
       error_log("Failed to prepare the watchlist notification query: " . $conn->error);
   }
 }
-
 ?>
