@@ -64,77 +64,73 @@ function print_listing_li($item_id, $title, $desc, $price, $num_bids, $end_time)
 }
 
 
-// Function to update auction status based on the current date and time
-function update_auction_status($conn) {
+// Function to update auction status and notify sellers
+function update_auction_status_with_notifications($conn) {
   // Set PHP's default timezone to UTC
   date_default_timezone_set('UTC');
 
   // Get current date and time
   $current_time = date('Y-m-d H:i:s');
 
-  // Step 1: Find auctions that have ended but are still marked as 'active'
-  $auction_end_query = "SELECT auction_id, username FROM auction WHERE end_date < ? AND auction_status = 'active'";
-  $auction_end_stmt = $conn->prepare($auction_end_query);
-  if ($auction_end_stmt) {
-      $auction_end_stmt->bind_param("s", $current_time);
-      $auction_end_stmt->execute();
-      $result = $auction_end_stmt->get_result();
+  // Query to select auctions that are still active but have expired
+  $query = "SELECT auction.auction_id, auction.end_date, auction.username, auction.reserve_price, highest_bids.highest_bid, highest_bids.last_bidder 
+            FROM auction 
+            LEFT JOIN highest_bids ON auction.auction_id = highest_bids.auction_id 
+            WHERE auction.end_date < ? AND auction.auction_status = 'active'";
 
-      // Loop through each auction that needs to be closed
+  // Prepare the query
+  $stmt = $conn->prepare($query);
+  if ($stmt) {
+      // Bind current time as parameter
+      $stmt->bind_param("s", $current_time);
+      // Execute the query
+      $stmt->execute();
+      $result = $stmt->get_result();
+
+      // Iterate through the result set
       while ($row = $result->fetch_assoc()) {
+          // Retrieve auction details
           $auction_id = $row['auction_id'];
-          $seller_username = $row['username'];
+          $username = $row['username'];
+          $reserve_price = $row['reserve_price'];
+          $highest_bid = $row['highest_bid'];
+          $last_bidder = $row['last_bidder'];
 
-          // Step 2: Update the auction status to 'closed'
-          $update_status_query = "UPDATE auction SET auction_status = 'closed' WHERE auction_id = ?";
-          $update_status_stmt = $conn->prepare($update_status_query);
-          if ($update_status_stmt) {
-              $update_status_stmt->bind_param("i", $auction_id);
-              $update_status_stmt->execute();
-              $update_status_stmt->close();
+          // Determine auction outcome and prepare notification message
+          if ($highest_bid === null) {
+              // No bids were placed
+              $message = "Your auction for Auction ID $auction_id ended without any bids being placed.";
+          } else if ($highest_bid < $reserve_price) {
+              // Reserve price not met
+              $message = "Your auction for Auction ID $auction_id ended with bids, but the reserve price of £" . number_format($reserve_price, 2) . " was not met.";
+          } else {
+              // Successful sale
+              $message = "Congratulations! Your auction for Auction ID $auction_id ended successfully with the highest bid of £" . number_format($highest_bid, 2) . " to User: $last_bidder.";
           }
 
-          // Step 3: Find the highest bidder for the auction
-          $highest_bid_query = "SELECT username, bid_amount FROM bids WHERE auction_id = ? ORDER BY bid_amount DESC LIMIT 1";
-          $highest_bid_stmt = $conn->prepare($highest_bid_query);
-          if ($highest_bid_stmt) {
-              $highest_bid_stmt->bind_param("i", $auction_id);
-              $highest_bid_stmt->execute();
-              $highest_bid_stmt->bind_result($highest_bidder, $winning_bid);
+          // Insert the notification for the seller
+          $notification_query = "INSERT INTO notifications (username, auction_id, message, type) VALUES (?, ?, ?, 'auction')";
+          $notification_stmt = $conn->prepare($notification_query);
+          if ($notification_stmt) {
+              $notification_stmt->bind_param("sis", $username, $auction_id, $message);
+              $notification_stmt->execute();
+              $notification_stmt->close();
+          }
 
-              if ($highest_bid_stmt->fetch()) {
-                  // Step 4: Notify the highest bidder
-                  $winner_message = "Congratulations! You have won the auction for auction ID: " . $auction_id . " with a bid of £" . number_format($winning_bid, 2);
-                  $winner_type = 'auction';
-                  $winner_notification_query = "INSERT INTO notifications (username, auction_id, message, type, is_read) VALUES (?, ?, ?, ?, FALSE)";
-                  $winner_notification_stmt = $conn->prepare($winner_notification_query);
-                  if ($winner_notification_stmt) {
-                      $winner_notification_stmt->bind_param("siss", $highest_bidder, $auction_id, $winner_message, $winner_type);
-                      $winner_notification_stmt->execute();
-                      $winner_notification_stmt->close();
-                  }
-              }
-
-              // Step 5: Notify the seller that the auction has ended
-              $seller_message = "Your auction (ID: " . $auction_id . ") has ended.";
-              if (isset($highest_bidder)) {
-                  $seller_message .= " The winning bidder is " . $highest_bidder . " with a bid of £" . number_format($winning_bid, 2) . ".";
-              }
-              $seller_type = 'auction';
-              $seller_notification_query = "INSERT INTO notifications (username, auction_id, message, type, is_read) VALUES (?, ?, ?, ?, FALSE)";
-              $seller_notification_stmt = $conn->prepare($seller_notification_query);
-              if ($seller_notification_stmt) {
-                  $seller_notification_stmt->bind_param("siss", $seller_username, $auction_id, $seller_message, $seller_type);
-                  $seller_notification_stmt->execute();
-                  $seller_notification_stmt->close();
-              }
-
-              $highest_bid_stmt->close();
+          // Update the auction status to 'closed'
+          $update_query = "UPDATE auction SET auction_status = 'closed' WHERE auction_id = ?";
+          $update_stmt = $conn->prepare($update_query);
+          if ($update_stmt) {
+              $update_stmt->bind_param("i", $auction_id);
+              $update_stmt->execute();
+              $update_stmt->close();
           }
       }
 
-      $auction_end_stmt->close();
+      // Close the original statement
+      $stmt->close();
   } else {
+      // Log an error if the query preparation failed
       echo "Error updating auction status: " . $conn->error;
   }
 }
