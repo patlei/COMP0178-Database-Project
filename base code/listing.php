@@ -6,28 +6,45 @@ include_once("config.php");
 // Set PHP's default timezone to UTC
 date_default_timezone_set('UTC');
 
-// // Start the session
+// Check if session is already started
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 
+// Alert Notification 
+// Check if there is a success message for placing a bid
+if (isset($_SESSION['success_message'])) {
+    echo '<div class="alert alert-success alert-dismissible fade show" role="alert">
+             ' . htmlspecialchars($_SESSION['success_message']) . '
+             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                 <span aria-hidden="true">&times;</span>
+             </button>
+          </div>';
+    unset($_SESSION['success_message']); // Clear the message
+}
 
-// // Check if the user is logged in
-// if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
-//   header('Location: login.php'); // Redirect to login if not logged in
-//   exit;
-// }
+// Check if there is an outbid notification to display
+if (isset($_SESSION['outbid_message'])) {
+    echo '<div class="alert alert-warning alert-dismissible fade show" role="alert">
+             ' . htmlspecialchars($_SESSION['outbid_message']) . '
+             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                 <span aria-hidden="true">&times;</span>
+             </button>
+          </div>';
+    unset($_SESSION['outbid_message']); // Clear the message
+}
 
-// // Check if there is a success message and display it
-// if (isset($_SESSION['success_message'])) {
-//   echo '<div class="alert alert-success">' . $_SESSION['success_message'] . '</div>';
-//   // Unset the success message so it doesn't show again on page refresh
-//   unset($_SESSION['success_message']);
-// }
-
-// // Optionally, display any error messages
-// if (isset($_SESSION['error_message'])) {
-//   echo '<div class="alert alert-danger">' . $_SESSION['error_message'] . '</div>';
-//   unset($_SESSION['error_message']);
-// }
-
+// Check if there is an auction won message
+if (isset($_SESSION['auction_won_message'])) {
+    echo '<div class="alert alert-info alert-dismissible fade show" role="alert">
+             ' . htmlspecialchars($_SESSION['auction_won_message']) . '
+             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                 <span aria-hidden="true">&times;</span>
+             </button>
+          </div>';
+    unset($_SESSION['auction_won_message']); // Clear the message
+}
+// End of Alerts Code Block
 
 // Get the auction ID from the URL parameter
 if (!isset($_GET['auction_id']) || empty($_GET['auction_id']) || !is_numeric($_GET['auction_id'])) {
@@ -36,6 +53,42 @@ if (!isset($_GET['auction_id']) || empty($_GET['auction_id']) || !is_numeric($_G
 }
 
 $auction_id = intval($_GET['auction_id']);
+
+// Update the views count for the given auction item
+$update_views_sql = "UPDATE auction SET views = views + 1 WHERE auction_id = ?";
+$stmt = $conn->prepare($update_views_sql);
+$stmt->bind_param("i", $auction_id);
+$stmt->execute();
+$stmt->close();
+
+// Ensure that a user is logged in before logging the user view
+if (isset($_SESSION['username'])) {
+  $username = $_SESSION['username'];
+
+  // Check if this auction has already been viewed by this user
+  $check_view_sql = "SELECT view_count FROM user_views WHERE username = ? AND auction_id = ?";
+  $stmt = $conn->prepare($check_view_sql);
+  $stmt->bind_param("si", $username, $auction_id);
+  $stmt->execute();
+  $stmt->store_result();
+
+  if ($stmt->num_rows > 0) {
+      // User has already viewed this listing, update the view count
+      $update_view_sql = "UPDATE user_views SET view_count = view_count + 1 WHERE username = ? AND auction_id = ?";
+      $update_stmt = $conn->prepare($update_view_sql);
+      $update_stmt->bind_param("si", $username, $auction_id);
+      $update_stmt->execute();
+      $update_stmt->close();
+  } else {
+      // First time user views this listing, insert into user_views
+      $insert_view_sql = "INSERT INTO user_views (username, auction_id, view_count) VALUES (?, ?, 1)";
+      $insert_stmt = $conn->prepare($insert_view_sql);
+      $insert_stmt->bind_param("si", $username, $auction_id);
+      $insert_stmt->execute();
+      $insert_stmt->close();
+  }
+  $stmt->close(); // Close the original view check statement
+}
 
 // Query to fetch the auction details along with category, size, material, color, condition, and views
 $sql = "SELECT a.item_name, a.item_description, a.username, a.starting_price, a.reserve_price, a.end_date, a.auction_status,
@@ -181,7 +234,7 @@ if ($auction_status === 'closed' && $num_bids > 0) {
   $stmt = $conn->prepare($check_sale);
   if ($stmt) {
       // Bind parameter
-      $stmt->bind_param("d", $auction_id);
+      $stmt->bind_param("i", $auction_id);
       
       // Execute the query
       $stmt->execute();
@@ -196,7 +249,7 @@ if ($auction_status === 'closed' && $num_bids > 0) {
           $stmt = $conn->prepare($add_sale);
           if ($stmt) {
               // Bind parameters
-              $stmt->bind_param("dssd", $auction_id, $seller_username, $highest_bidder, $current_price);
+              $stmt->bind_param("iiss", $auction_id, $seller_username, $highest_bidder, $current_price);
 
               // Execute the statement
               if ($stmt->execute()) {
@@ -483,4 +536,3 @@ function removeFromWatchlist(button) {
 }
 
 </script>
-

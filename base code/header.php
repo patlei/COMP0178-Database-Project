@@ -2,8 +2,11 @@
 include_once('connection.php');
 include_once('utilities.php');
 
-// Update auction status
+// Update auction status (this ensures any completed auctions are marked as closed)
 update_auction_status($conn);
+
+// Update watchlist notifications for ending auctions
+update_watchlist_notifications($conn);
 
 session_start();
 
@@ -87,7 +90,6 @@ if ($_SESSION['logged_in'] && isset($_SESSION['username'])) {
   </div>
 </nav>
 
-<!-- Second Navbar for Site Navigation -->
 <!-- Second Navbar for Site Navigation -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#siteNavbar" aria-controls="siteNavbar" aria-expanded="false" aria-label="Toggle navigation">

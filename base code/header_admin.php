@@ -14,6 +14,30 @@ session_regenerate_id(true);
 $greeting_message = $_SESSION['logged_in'] && isset($_SESSION['username']) 
     ? "Welcome back, " . htmlspecialchars($_SESSION['username']) . "!" 
     : "";
+
+// Include database connection
+include_once("connection.php");
+
+// Retrieve the logged-in username and set unread notifications count
+$unread_count = 0;
+
+if ($_SESSION['logged_in'] && isset($_SESSION['username'])) {
+    $username = $_SESSION['username'];
+
+    // Query to count the unread notifications for the logged-in user
+    $unread_count_sql = "SELECT COUNT(*) AS unread_count FROM notifications WHERE username = ? AND is_read = FALSE";
+    $stmt = $conn->prepare($unread_count_sql);
+    if ($stmt) {
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $stmt->bind_result($unread_count);
+        $stmt->fetch();
+        $stmt->close();
+    } else {
+        // You could log this error or handle it appropriately
+        error_log("Failed to prepare statement for unread notifications count: " . $conn->error);
+    }
+}
 ?>
 
 <!doctype html>
@@ -35,10 +59,14 @@ $greeting_message = $_SESSION['logged_in'] && isset($_SESSION['username'])
 
 <body>
 
+<div id="loading-spinner" style="display: none;">
+    <i class="fa fa-spinner fa-spin"></i> Loading...
+</div>
+
 <!-- Top Navbar -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container-fluid">
-    <a class="navbar-brand d-flex align-items-center" href="index.php"> 
+    <a class="navbar-brand d-flex align-items-center" href="admin_browse.php"> 
       <img src="../icon.jpg" alt="Knitty Gritty Logo" style="height: 60px; width: auto; margin-right: 10px;">
       <span class="store-title">Knitty Gritty</span>
     </a>
@@ -51,27 +79,19 @@ $greeting_message = $_SESSION['logged_in'] && isset($_SESSION['username'])
       <ul class="navbar-nav ml-auto">
         <!-- Search Form -->
         <li class="nav-item">
-          <form class="form-inline my-2 my-lg-0" method="GET" action="browse.php">
+          <form class="form-inline my-2 my-lg-0" method="GET" action="admin_browse.php">
             <input class="form-control mr-sm-2" type="text" name="keyword" placeholder="Search listings" aria-label="Search">
             <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
           </form>
         </li>
 
         <?php if ($_SESSION['logged_in']): ?>
-          <!-- Notification Icon -->
-          <li class="nav-item mx-2">
-            <a class="nav-link" href="notifications.php"><i class="fa fa-bell"></i></a>
-          </li>
-          
           <!-- User Dropdown -->
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               <i class="fa fa-user"></i> <?php echo htmlspecialchars($_SESSION['username']); ?>
             </a>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
-              <a class="dropdown-item" href="profile.php">My Profile</a>
-              <a class="dropdown-item" href="settings.php">Settings</a>
-              <div class="dropdown-divider"></div>
               <a class="dropdown-item" href="logout.php">Logout</a>
             </div>
           </li>

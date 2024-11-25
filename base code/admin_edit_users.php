@@ -1,8 +1,7 @@
-<?php
+<?php 
 
 include_once("connection.php");    // Database connection
 include_once("header_admin.php");  // Admin header
-
 
 // Check if username is provided in the URL
 if (!isset($_GET['username'])) {
@@ -13,7 +12,7 @@ if (!isset($_GET['username'])) {
 $username = $_GET['username'];
 
 // Fetch user data from the database using the username
-$sql = "SELECT username, email, average_rating, accountType FROM users WHERE username = ?";
+$sql = "SELECT username, email, average_rating, blocked FROM users WHERE username = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $username);
 $stmt->execute();
@@ -28,22 +27,21 @@ $user = $result->fetch_assoc();
 
 // Process form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = $_POST['username'];
     $email = $_POST['email'];
     $average_rating = $_POST['average_rating'];
-    $account_type = isset($_POST['block_user']) ? 'blocked' : 'user';
+    $blocked = isset($_POST['block_user']) ? 1 : 0; // Checkbox determines blocked status
 
     // Update user information
-    $update_sql = "UPDATE users SET email = ?, average_rating = ?, accountType = ? WHERE username = ?";
+    $update_sql = "UPDATE users SET email = ?, average_rating = ?, blocked = ? WHERE username = ?";
     $update_stmt = $conn->prepare($update_sql);
-    $update_stmt->bind_param("siss", $email, $average_rating, $account_type, $username);
+    $update_stmt->bind_param("siis", $email, $average_rating, $blocked, $username);
 
     if ($update_stmt->execute()) {
         echo "<div class='alert alert-success'>User updated successfully.</div>";
         // Refresh user data after update
         $user['email'] = $email;
         $user['average_rating'] = $average_rating;
-        $user['accountType'] = $account_type;
+        $user['blocked'] = $blocked;
     } else {
         echo "<div class='alert alert-danger'>Error updating user.</div>";
     }
@@ -77,7 +75,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
 
         <div class="form-group form-check">
-            <input type="checkbox" class="form-check-input" id="block_user" name="block_user" <?php echo ($user['accountType'] == 'blocked') ? 'checked' : ''; ?>>
+            <input type="checkbox" class="form-check-input" id="block_user" name="block_user" <?php echo ($user['blocked'] == 1) ? 'checked' : ''; ?>>
             <label class="form-check-label" for="block_user">Block User</label>
         </div>
 
