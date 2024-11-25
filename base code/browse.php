@@ -356,15 +356,15 @@ $max_page = ($results_per_page > 0) ? ceil($num_results / $results_per_page) : 1
                 $description = $row['item_description'];
                 $current_price = $row['current_price']; // Highest bid price
                 $end_date = new DateTime($row['end_date']);
-                $image_path = $row['image_path'];
-
-                // Construct full image path
-                $full_image_path = IMAGE_BASE_PATH . $image_path;
-
+                $image_path = isset($row['image_path']) ? htmlspecialchars($row['image_path']) : null;
+            
+                // Check if image path is valid, else use placeholder image
+                $image_src = (!empty($image_path) && file_exists($image_path)) ? $image_path : './images/default-placeholder.png';
+                
                 // Display item in a grid layout with an image
                 echo "<div class='col-md-4 mb-4'>
                         <div class='card h-100'>
-                            <img src='" . $full_image_path . "' class='card-img-top' alt='Item Image' style='object-fit: cover; height: 200px;'>
+                            <img src='" . $image_src . "' class='card-img-top' alt='" . $title . "' style='object-fit: cover; height: 200px;'>
                             <div class='card-body'>
                                 <h5 class='card-title'><a href='listing.php?auction_id=$auction_id'>$title</a></h5>
                                 <p class='card-text'>" . htmlspecialchars($description) . "</p>
@@ -453,14 +453,17 @@ $max_page = ($results_per_page > 0) ? ceil($num_results / $results_per_page) : 1
             $recently_viewed_stmt->execute();
             $recently_viewed_result = $recently_viewed_stmt->get_result();
 
+            $image_path = isset($row['image_path']) ? htmlspecialchars($row['image_path']) : null;
+            
+            // Check if image path is valid, else use placeholder image
+            $image_src = (!empty($image_path) && file_exists($image_path)) ? $image_path : './images/default-placeholder.png';
+            
+
             if ($recently_viewed_result && $recently_viewed_result->num_rows > 0) {
                 while ($rec_row = $recently_viewed_result->fetch_assoc()) {
-                    // Construct the full image path
-                    $full_image_path = IMAGE_BASE_PATH . $rec_row['image_path'];
-
                     echo '<div class="col-3">
                             <div class="card h-100">
-                                <img src="' . htmlspecialchars($full_image_path) . '" class="card-img-top" alt="' . htmlspecialchars($rec_row['item_name']) . '" style="object-fit: cover; height: 150px;">
+                                <img src="' . $image_src . '" class="card-img-top" alt="' . htmlspecialchars($rec_row['item_name']) . '" style="object-fit: cover; height: 150px;">
                                 <div class="card-body">
                                     <h5 class="card-title">' . htmlspecialchars($rec_row['item_name']) . '</h5>
                                     <p class="card-text"><strong>Highest Bid: £' . number_format($rec_row['highest_bid'], 2) . '</strong></p>
@@ -513,12 +516,15 @@ $max_page = ($results_per_page > 0) ? ceil($num_results / $results_per_page) : 1
                 if ($listing_count >= $max_listings) {
                     break;
                 }
-                // Construct the full image path
-                $full_image_path = IMAGE_BASE_PATH . $pop_row['image_path'];
-
+                
+                $image_path = isset($row['image_path']) ? htmlspecialchars($row['image_path']) : null;
+            
+                // Check if image path is valid, else use placeholder image
+                $image_src = (!empty($image_path) && file_exists($image_path)) ? $image_path : './images/default-placeholder.png';
+            
                 echo '<div class="col-3">
                         <div class="card h-100">
-                            <img src="' . htmlspecialchars($full_image_path) . '" class="card-img-top" alt="' . htmlspecialchars($pop_row['item_name']) . '" style="object-fit: cover; height: 150px;">
+                            <img src="' . $image_src. '" class="card-img-top" alt="' . htmlspecialchars($pop_row['item_name']) . '" style="object-fit: cover; height: 150px;">
                             <div class="card-body">
                                 <h5 class="card-title">' . htmlspecialchars($pop_row['item_name']) . '</h5>
                                 <p class="card-text"><strong>Highest Bid: £' . number_format($pop_row['highest_bid'], 2) . '</strong></p>

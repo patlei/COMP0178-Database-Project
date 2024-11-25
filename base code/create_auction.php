@@ -1,8 +1,9 @@
 <?php 
 include_once("header.php");
 include 'connection.php'; 
-############### ADDING IMAGES OPTION is meh#####################
 
+ // Set PHP's default timezone to UTC
+ date_default_timezone_set('UTC');
 
 // Check if the user is logged in
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
@@ -60,7 +61,7 @@ if (!$color_result) {
       before they try to send it, but that kind of functionality should be
       extremely low-priority / only done after all database functions are
       complete. -->
-      <form method="post" action="create_auction_result.php">
+      <form method="post" action="create_auction_result.php" enctype="multipart/form-data">
         <div class="form-group row">
           <label for="auctionTitle" class="col-sm-2 col-form-label text-right">Title of auction</label>
           <div class="col-sm-10">
@@ -167,10 +168,10 @@ if (!$color_result) {
           </div>
         </div>
         <div class="form-group row">
-          <label for="auctionImage" class="col-sm-2 col-form-label text-right">Image path</label>
+          <label for="auctionImage" class="col-sm-2 col-form-label text-right">Image</label>
           <div class="col-sm-10">
-            <input type="text" class="form-control" id="auctionImage" name="auctionImage">
-            <small id="imageHelp" class="form-text text-muted"> Optional. Provide an image title of an image you would like to upload</small>
+            <input type="file" id="auctionImage" name="auctionImage" value="">
+            <small id="imageHelp" class="form-text text-muted"> Optional. Upload an image of the item in your auction</small>
           </div>
         </div>
         <div class="form-group row">
