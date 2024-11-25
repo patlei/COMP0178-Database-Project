@@ -390,8 +390,26 @@ VALUES
     ('user5', '9876534523456666', '456 Refent St, London');
 
 
-
 -- --------------------------------------------------------
+
+-- Table structure for table `notifications`
+
+CREATE TABLE IF NOT EXISTS notifications (
+  notification_id INT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(30) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  auction_id INT(10) UNSIGNED,
+  message TEXT NOT NULL,
+  type ENUM('bidding', 'auction', 'watchlist') NOT NULL,  -- Updated ENUM values for categorisation
+  is_read BOOLEAN DEFAULT FALSE,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (username) REFERENCES users(username)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  FOREIGN KEY (auction_id) REFERENCES auction(auction_id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 
 -- Final configuration and cleanup
 
