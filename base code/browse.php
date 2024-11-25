@@ -429,33 +429,32 @@ $max_page = ($results_per_page > 0) ? ceil($num_results / $results_per_page) : 1
     </nav>
 </div>
 
-<!-- Recommendation Section Based on User's Most Viewed Items -->
+<!-- Listings You Have Been Viewing Lately Section -->
 <div class="container mt-5">
-    <h3>Recommended for You</h3>
+    <h3>Listings You Have Been Viewing Lately...</h3>
     <div class="scrolling-wrapper row flex-row flex-nowrap mt-4 pb-4 pt-2">
         <?php
         $username = isset($_SESSION['username']) ? $_SESSION['username'] : null;
 
         if ($username) {
-            // Fetch recommended items for the logged-in user
-            // These recommendations should be independent of the filters applied in the search
-            $user_rec_sql = "SELECT a.auction_id, a.item_name, a.image_path, 
-                            COALESCE(MAX(b.bid_amount), a.starting_price) AS highest_bid 
-                            FROM auction a
-                            LEFT JOIN bids b ON a.auction_id = b.auction_id
-                            JOIN user_views uv ON a.auction_id = uv.auction_id
-                            WHERE a.auction_status = 'active' AND uv.username = ?
-                            GROUP BY a.auction_id
-                            ORDER BY uv.view_count DESC
-                            LIMIT 10";
+            // Fetch items the logged-in user has viewed recently
+            $recently_viewed_sql = "SELECT a.auction_id, a.item_name, a.image_path, 
+                                    COALESCE(MAX(b.bid_amount), a.starting_price) AS highest_bid 
+                                    FROM user_views uv
+                                    JOIN auction a ON uv.auction_id = a.auction_id
+                                    LEFT JOIN bids b ON a.auction_id = b.auction_id
+                                    WHERE a.auction_status = 'active' AND uv.username = ?
+                                    GROUP BY a.auction_id
+                                    ORDER BY uv.view_count DESC
+                                    LIMIT 10";
 
-            $user_rec_stmt = $conn->prepare($user_rec_sql);
-            $user_rec_stmt->bind_param('s', $username);
-            $user_rec_stmt->execute();
-            $user_rec_result = $user_rec_stmt->get_result();
+            $recently_viewed_stmt = $conn->prepare($recently_viewed_sql);
+            $recently_viewed_stmt->bind_param('s', $username);
+            $recently_viewed_stmt->execute();
+            $recently_viewed_result = $recently_viewed_stmt->get_result();
 
-            if ($user_rec_result && $user_rec_result->num_rows > 0) {
-                while ($rec_row = $user_rec_result->fetch_assoc()) {
+            if ($recently_viewed_result && $recently_viewed_result->num_rows > 0) {
+                while ($rec_row = $recently_viewed_result->fetch_assoc()) {
                     // Construct the full image path
                     $full_image_path = IMAGE_BASE_PATH . $rec_row['image_path'];
 
@@ -472,14 +471,14 @@ $max_page = ($results_per_page > 0) ? ceil($num_results / $results_per_page) : 1
                 }
             } else {
                 echo '<div class="col-12 d-flex align-items-center justify-content-center" style="height: 150px;">
-                        <p class="text-muted">No personalised recommendations available at this time.</p>
+                        <p class="text-muted">You haven\'t viewed any listings yet. Start exploring to see them here!</p>
                       </div>';
             }
 
-            $user_rec_stmt->close();
+            $recently_viewed_stmt->close();
         } else {
             echo '<div class="col-12 d-flex align-items-center justify-content-center flex-column" style="height: 150px;">
-                    <p class="text-muted">Please log in to see personalised recommendations.</p>
+                    <p class="text-muted">Please log in to see listings you have viewed recently.</p>
                     <a href="login.php" class="btn btn-primary mt-2">Log In</a>
                   </div>';
         }
@@ -490,6 +489,9 @@ $max_page = ($results_per_page > 0) ? ceil($num_results / $results_per_page) : 1
 <!-- Popular Listings Section Based on Overall Views -->
 <div class="container mt-5">
     <h3>Popular Listings</h3>
+    <div class="col-12 d-flex align-items-center justify-content-center" style="height: 20px;">
+        <p>Check out some of the most viewed and popular items currently up for auction. Don't miss your chance to place a bid!</p>
+    </div>
     <div class="scrolling-wrapper row flex-row flex-nowrap mt-4 pb-4 pt-2">
         <?php
         $popular_sql = "SELECT a.auction_id, a.item_name, a.image_path, 
@@ -504,7 +506,13 @@ $max_page = ($results_per_page > 0) ? ceil($num_results / $results_per_page) : 1
         $popular_result = $conn->query($popular_sql);
 
         if ($popular_result && $popular_result->num_rows > 0) {
+            $listing_count = 0;
+            $max_listings = 8; // Limit the number of listings that can be displayed
+
             while ($pop_row = $popular_result->fetch_assoc()) {
+                if ($listing_count >= $max_listings) {
+                    break;
+                }
                 // Construct the full image path
                 $full_image_path = IMAGE_BASE_PATH . $pop_row['image_path'];
 
@@ -518,6 +526,8 @@ $max_page = ($results_per_page > 0) ? ceil($num_results / $results_per_page) : 1
                             </div>
                         </div>
                     </div>';
+                
+                $listing_count++;
             }
         } else {
             echo '<p>No popular listings available at this time.</p>';
@@ -525,6 +535,5 @@ $max_page = ($results_per_page > 0) ? ceil($num_results / $results_per_page) : 1
         ?>
     </div>
 </div>
-
 
 <?php include_once("footer.php"); ?>
