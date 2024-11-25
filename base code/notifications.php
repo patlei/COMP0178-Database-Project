@@ -170,15 +170,14 @@ echo '<div id="loading-spinner" class="spinner-border text-primary" role="status
                 if (response.trim() === 'success') {
                     // Remove the 'list-group-item-primary' class to mark it visually as read
                     $(element).closest('.list-group-item').removeClass('list-group-item-primary');
-                    $(element).remove();
-                    // Update unread count
+                    $(element).remove(); // Remove the "Mark as read" button
+                    // Update unread count if there's an element tracking the unread count
                     let unreadCountElem = $('#unread-count');
                     let currentCount = parseInt(unreadCountElem.attr('data-count'), 10);
                     if (currentCount > 0) {
                         currentCount -= 1;
                         unreadCountElem.attr('data-count', currentCount);
                         unreadCountElem.text(currentCount);
-                        // Hide the badge if there are no unread notifications left
                         if (currentCount === 0) {
                             unreadCountElem.hide();
                         }
