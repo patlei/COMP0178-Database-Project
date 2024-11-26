@@ -33,6 +33,12 @@ if ($blocked) {
 <div class="container my-5">
 
 <?php
+ // Set PHP's default timezone to UTC
+ date_default_timezone_set('UTC');
+
+// Retrieve username from session
+$username = $_SESSION['username'];
+
 // Handle auction creation form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Extract data from the form
@@ -46,9 +52,43 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $auctionMaterial = isset($_POST['auctionMaterial']) ? $_POST['auctionMaterial'] : '';
     $auctionColor = isset($_POST['auctionColor']) ? $_POST['auctionColor'] : '';
     $auctionCondition = isset($_POST['auctionCondition']) ? $_POST['auctionCondition'] : '';
-    $auctionImage = isset($_POST['auctionImage']) ? $_POST['auctionImage'] : '';
+    
+    if (isset($_FILES['auctionImage']) && $_FILES['auctionImage']['error'] === 0) {
+        $imageName = $_FILES['auctionImage']['name'];
+        $imageTempName = $_FILES['auctionImage']['tmp_name'];
+        $imageExtension = strtolower(pathinfo($imageName, PATHINFO_EXTENSION));
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+    
+        if (in_array($imageExtension, $allowedExtensions)) {
+            $imageNewName = uniqid('', true) . '.' . $imageExtension;
+            $imagePath = './images/' . $imageNewName;
+    
+            //Debugging purposes
+            if (!is_dir('./images')) {
+                echo "Error: Images directory does not exist.";
+                exit;
+            }
+    
+            if (move_uploaded_file($imageTempName, $imagePath)) {
+                $auctionImage = $imagePath;
+            } else {
+                echo "Error: Could not move uploaded file.";
+            }
+            if (!is_writable('./images')) {
+                echo "Error: 'images' directory is not writable.";
+                exit;
+            }
+        } else {
+            echo "Error: Invalid file type. Only JPG, JPEG, PNG, and GIF are allowed.";
+        }
+    } else {
+        echo "Error: Image upload failed with error code " . $_FILES['auctionImage']['error'];
+    }
+
     
     // Get today's date for start_date
+    // Set PHP's default timezone to UTC
+    date_default_timezone_set('UTC');   
     $auctionStartDate = date('Y-m-d H:i:s');  // Current date and time
     $auctionEndDate = date('Y-m-d H:i:s', strtotime($auctionEndDate));  // Convert to datetime format
 

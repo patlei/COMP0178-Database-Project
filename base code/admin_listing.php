@@ -50,8 +50,12 @@ $views = $auction['views'];
 $starting_price = $auction['starting_price'];
 $reserve_price = $auction['reserve_price'];
 $end_time = new DateTime($auction['end_date']);
-$image_path = IMAGE_BASE_PATH . $auction['image_path'];
 $auction_status = $auction['auction_status'];
+$image_path = isset($auction['image_path']) ? htmlspecialchars($auction['image_path']) : null;
+            
+// Check if image path is valid, else use placeholder image
+$image_src = (!empty($image_path) && file_exists($image_path)) ? $image_path : './images/default-placeholder.png';
+            
 
 // Fetch bid records
 $bids_sql = "SELECT b.username, b.bid_amount, b.bid_time 
@@ -72,7 +76,7 @@ $bids_result = $bids_stmt->get_result();
     <div class="card mb-4">
         <div class="row no-gutters">
             <div class="col-md-4">
-                <img src="<?php echo htmlspecialchars($image_path); ?>" class="card-img" alt="Auction Item Image">
+                <img src="<?php echo $image_src; ?>" class="card-img" alt="Auction Item Image">
             </div>
             <div class="col-md-8">
                 <div class="card-body">

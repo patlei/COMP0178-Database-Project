@@ -52,10 +52,14 @@ $ending_soon_result = $conn->query($ending_soon_sql);
             while ($row = $popular_result->fetch_assoc()) {
                 $image_path = $row['image_path'];
                 // Construct full image path
-                $full_image_path = IMAGE_BASE_PATH . $image_path;
+                $image_path = isset($row['image_path']) ? htmlspecialchars($row['image_path']) : null;
+            
+                // Check if image path is valid, else use placeholder image
+                $image_src = (!empty($image_path) && file_exists($image_path)) ? $image_path : './images/default-placeholder.png';
+            
                 echo '<div class="col-3">
                         <div class="card h-100">
-                            <img src="' . $full_image_path . '" class="card-img-top" alt="' . htmlspecialchars($row['item_name']) . '">
+                            <img src="' . $image_src . '" class="card-img-top" alt="' . htmlspecialchars($row['item_name']) . '">
                             <div class="card-body">
                                 <h5 class="card-title">' . htmlspecialchars($row['item_name']) . '</h5>
                                 <p class="card-text"><strong>Starting Price: £' . number_format($row['starting_price'], 2) . '</strong></p>
@@ -107,11 +111,14 @@ $ending_soon_result = $conn->query($ending_soon_sql);
             while ($row = $ending_soon_result->fetch_assoc()) {
                 $end_date = new DateTime($row['end_date']);
                 $image_path = $row['image_path'];
-                // Construct full image path
-                $full_image_path = IMAGE_BASE_PATH . $image_path;
+                $image_path = isset($row['image_path']) ? htmlspecialchars($row['image_path']) : null;
+            
+                // Check if image path is valid, else use placeholder image
+                $image_src = (!empty($image_path) && file_exists($image_path)) ? $image_path : './images/default-placeholder.png';
+            
                 echo '<div class="col-3">
                         <div class="card h-100">
-                            <img src="' . $full_image_path . '" class="card-img-top" alt="' . htmlspecialchars($row['item_name']) . '">
+                            <img src="' . $image_src . '" class="card-img-top" alt="' . htmlspecialchars($row['item_name']) . '">
                             <div class="card-body">
                                 <h5 class="card-title">' . htmlspecialchars($row['item_name']) . '</h5>
                                 <p class="card-text"><strong>Starting Price: £' . number_format($row['starting_price'], 2) . '</strong></p>

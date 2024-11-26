@@ -2,7 +2,7 @@
 include_once("header.php");
 include_once("connection.php");
 require_once("utilities.php");
-include_once("config.php");
+
 // Set PHP's default timezone to UTC
 date_default_timezone_set('UTC');
 
@@ -126,7 +126,7 @@ $starting_price = $auction['starting_price'];
 $reserve_price = $auction['reserve_price'];
 $end_time = $auction['end_date'];
 $auction_status = $auction['auction_status'];
-$image_path = IMAGE_BASE_PATH . $auction['image_path'];
+$image_path = $auction['image_path'];
 $seller_username = $auction['username'];
 
 $stmt->close();
@@ -225,53 +225,6 @@ if (!$result2) {
 ?>
 
 
-<?php
-
-// Register the sale in the database
-if ($auction_status === 'closed' && $num_bids > 0) {
-  // Check if auction_id is in table sales
-  $check_sale = "SELECT COUNT(*) FROM sales WHERE auction_id = ?";
-  $stmt = $conn->prepare($check_sale);
-  if ($stmt) {
-      // Bind parameter
-      $stmt->bind_param("i", $auction_id);
-      
-      // Execute the query
-      $stmt->execute();
-      $stmt->bind_result($count);
-      $stmt->fetch();
-      $stmt->close();
-
-      if ($count == 0) {
-          // if auction_id not in sales yet, proceed to insert
-          $add_sale = "INSERT INTO sales (auction_id, seller_username, buyer_username, sale_price)
-                      VALUES (?, ?, ?, ?)";
-          $stmt = $conn->prepare($add_sale);
-          if ($stmt) {
-              // Bind parameters
-              $stmt->bind_param("iiss", $auction_id, $seller_username, $highest_bidder, $current_price);
-
-              // Execute the statement
-              if ($stmt->execute()) {
-                  echo "Sale successfully registered!";
-              } else {
-                  echo "Error inserting data: " . $stmt->error;
-              }
-
-              // Close the prepared statement
-              $stmt->close();
-          } else {
-              echo "Error preparing statement: " . $conn->error;
-          }
-      } // Don't need to inform the user that the sale has been registered previously
-  } else {
-      echo "Error preparing check statement: " . $conn->error;
-  }
-}
-
-       
-?>
-
 <div class="container">
 
 <div class="row"> <!-- Row #1 with auction title + watch button -->
@@ -296,13 +249,22 @@ if ($auction_status === 'closed' && $num_bids > 0) {
 </div>
 <div class="row"> <!-- Row for item image and description -->
     <div class="col-sm-4"> <!-- Left column for image -->
-      <?php if (!empty($image_path)): ?>
-        <img src="<?php echo htmlspecialchars($image_path); ?>" alt="Auction Item Image" class="img-fluid">
-
+      <?php if (!empty($image_path) && file_exists($image_path)): ?>
+          <?php
+            // Generate the image HTML
+            $image_src = htmlspecialchars($image_path);
+            $image_html = '<img src="' . $image_src . '" alt="' . htmlspecialchars($title) . '" class="img-thumbnail" style="width: 150px; height: auto; margin-right: 15px;">';
+            echo $image_html;
+          ?>
       <?php else: ?>
-        <p>No image available for this auction.</p>
+          <?php
+            // Use placeholder if image path is invalid or empty
+            $image_src = './images/default-placeholder.png';
+            $image_html = '<img src="' . $image_src . '" alt="Placeholder Image" class="img-thumbnail" style="width: 150px; height: auto; margin-right: 15px;">';
+            echo $image_html;
+          ?>
       <?php endif; ?>
-    </div>
+      </div>
 <div class="row"> <!-- Row #2 with auction information + bidding info -->
   <div class="col-sm-8"> <!-- Left col with item info -->
 
@@ -409,26 +371,41 @@ if ($auction_status === 'closed' && $num_bids > 0) {
         ?>
 <?php else: ?>
      Auction ends <?php echo(date_format($end_time, 'j M H:i') . $time_remaining) ?></>  
-    <p class="lead">Current bid: £<?php echo(number_format($current_price, 2)) ?></p>
+    <p class="lead">Current price: £<?php echo(number_format($current_price, 2)) ?></p>
     <p><strong>Number of Bids:</strong> <?php echo($num_bids); ?></p>
     <!-- Displaying message for the user if their bid is the highest -->
     <?php if (isset($_SESSION['username']) && $_SESSION['username'] === $highest_bidder): ?>
       <p class="text-success">Highest bid is yours!</p>
     <?php endif; ?>
 
+    <?php 
+    if (isset($_SESSION['username'])) {
+    $username = $_SESSION['username'];
 
-    <!-- Bidding form -->
-    <form method="POST" action="place_bid.php">
-      <div class="input-group">
-        <div class="input-group-prepend">
-          <span class="input-group-text">£</span>
-        </div>
-        <input type="number" class="form-control" id="bid" name="bid" required>
-      </div>
-      <!-- Hidden auction_id  -->
-      <input type="hidden" name="auction_id" value="<?php echo $_GET['auction_id']; ?>">
-      <button type="submit" class="btn btn-primary form-control">Place bid</button>
-    </form>
+    // Check if the logged-in user is NOT the seller
+    if ($username !== $seller_username) {
+        ?>
+        <!-- Bidding form -->
+        <form method="POST" action="place_bid.php">
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text">£</span>
+            </div>
+            <input type="number" class="form-control" id="bid" name="bid" required>
+          </div>
+          <!-- Hidden auction_id -->
+          <input type="hidden" name="auction_id" value="<?php echo $_GET['auction_id']; ?>">
+          <button type="submit" class="btn btn-primary form-control">Place bid</button>
+        </form>
+        <?php
+    } else {
+        // Show a message for the seller
+        echo "<p class='text-muted'>You cannot bid on your own auction.</p>";
+    }
+} else {
+    // Message for non-logged-in users
+    echo "<p class='text-muted'>Please <a href='login.php'>log in</a> to place a bid.</p>";
+} ?>
 
 <?php endif ?>
 
@@ -448,12 +425,14 @@ if ($auction_status === 'closed' && $num_bids > 0) {
           <?php
           // Loop through each result and display it using the utility function
           while ($row = $result2->fetch_assoc()) {
-            $image_path = $row['image_path'];
-            // Construct full image path
-            $full_image_path = IMAGE_BASE_PATH . $image_path;
+            $image_path = isset($row['image_path']) ? htmlspecialchars($row['image_path']) : null;
+            
+            // Check if image path is valid, else use placeholder image
+            $image_src = (!empty($image_path) && file_exists($image_path)) ? $image_path : './images/default-placeholder.png';
+            
             echo '<div class="col-3">
                     <div class="card h-100">
-                        <img src="' . $full_image_path . '" class="card-img-top" alt="' . htmlspecialchars($row['item_name']) . '">
+                        <img src="' . $image_src. '" class="card-img-top" alt="' . htmlspecialchars($row['item_name']) . '">
                         <div class="card-body">
                             <h5 class="card-title">' . htmlspecialchars($row['item_name']) . '</h5>
                             <p class="card-text"><strong>Current Price: £' . number_format($row['current_price'], 2) . '</strong></p>

@@ -25,46 +25,49 @@ function display_time_remaining($interval) {
 
 // print_listing_li:
 // This function prints an HTML <li> element containing an auction listing
-function print_listing_li($item_id, $title, $desc, $price, $num_bids, $end_time)
+// print_listing_li:
+// This function prints an HTML <li> element containing an auction listing
+function print_listing_li($item_id, $title, $desc, $price, $num_bids, $end_time, $image_path = null)
 {
   // Truncate long descriptions
   if (strlen($desc) > 250) {
     $desc_shortened = substr($desc, 0, 250) . '...';
-  }
-  else {
+  } else {
     $desc_shortened = $desc;
   }
   
   // Fix language of bid vs. bids
-  if ($num_bids == 1) {
-    $bid = ' bid';
-  }
-  else {
-    $bid = ' bids';
-  }
-  
+  $bid = ($num_bids == 1) ? ' bid' : ' bids';
+
   // Calculate time to auction end
   $now = new DateTime();
   if ($now > $end_time) {
     $time_remaining = 'This auction has ended';
-  }
-  else {
+  } else {
     // Get interval:
     $time_to_end = date_diff($now, $end_time);
     $time_remaining = display_time_remaining($time_to_end) . ' remaining';
   }
-  
+
+ // Check if image path is valid, else use placeholder image
+ $image_src = (!empty($image_path) && file_exists($image_path)) ? htmlspecialchars($image_path) : './images/default-placeholder.png';
+ $image_html = '<img src="' . $image_src . '" alt="' . htmlspecialchars($title) . '" class="img-thumbnail" style="width: 150px; height: auto; margin-right: 15px;">';
+
   // Print HTML
   echo('
-    <li class="list-group-item d-flex justify-content-between">
-    <div class="p-2 mr-5"><h5><a href="listing.php?auction_id=' . $item_id . '">' . $title . '</a></h5>' . $desc_shortened . '</div>
-    <div class="text-center text-nowrap"><span style="font-size: 1.5em">£' . number_format($price, 2) . '</span><br/>' . $num_bids . $bid . '<br/>' . $time_remaining . '</div>
-  </li>'
+    <li class="list-group-item d-flex align-items-center">
+      ' . $image_html . '
+      <div class="flex-grow-1">
+        <h5><a href="listing.php?auction_id=' . $item_id . '">' . $title . '</a></h5>
+        <p>' . $desc_shortened . '</p>
+        <div><strong>£' . number_format($price, 2) . '</strong> - ' . $num_bids . $bid . '<br>' . $time_remaining . '</div>
+      </div>
+    </li>'
   );
 }
 
 
-// Function to update auction status based on the current date and time
+// Function to update auction status and notify sellers and buyers
 function update_auction_status($conn) {
   // Set PHP's default timezone to UTC
   date_default_timezone_set('UTC');
@@ -72,69 +75,75 @@ function update_auction_status($conn) {
   // Get current date and time
   $current_time = date('Y-m-d H:i:s');
 
-  // Step 1: Find auctions that have ended but are still marked as 'active'
-  $auction_end_query = "SELECT auction_id, username FROM auction WHERE end_date < ? AND auction_status = 'active'";
-  $auction_end_stmt = $conn->prepare($auction_end_query);
-  if ($auction_end_stmt) {
-      $auction_end_stmt->bind_param("s", $current_time);
-      $auction_end_stmt->execute();
-      $result = $auction_end_stmt->get_result();
+  // Query to select auctions that are still active but have expired
+  $query = "SELECT auction.auction_id, auction.end_date, auction.username, auction.reserve_price, highest_bids.highest_bid, highest_bids.last_bidder 
+            FROM auction 
+            LEFT JOIN highest_bids ON auction.auction_id = highest_bids.auction_id 
+            WHERE auction.end_date < ? AND auction.auction_status = 'active'";
 
-      // Loop through each auction that needs to be closed
+  // Prepare the query
+  $stmt = $conn->prepare($query);
+  if ($stmt) {
+      // Bind current time as parameter
+      $stmt->bind_param("s", $current_time);
+      // Execute the query
+      $stmt->execute();
+      $result = $stmt->get_result();
+
+      // Iterate through the result set
       while ($row = $result->fetch_assoc()) {
+          // Retrieve auction details
           $auction_id = $row['auction_id'];
-          $seller_username = $row['username'];
+          $username = $row['username'];
+          $reserve_price = $row['reserve_price'];
+          $highest_bid = $row['highest_bid'];
+          $last_bidder = $row['last_bidder'];
 
-          // Step 2: Update the auction status to 'closed'
-          $update_status_query = "UPDATE auction SET auction_status = 'closed' WHERE auction_id = ?";
-          $update_status_stmt = $conn->prepare($update_status_query);
-          if ($update_status_stmt) {
-              $update_status_stmt->bind_param("i", $auction_id);
-              $update_status_stmt->execute();
-              $update_status_stmt->close();
+          // Determine auction outcome and prepare notification message for seller
+          if ($highest_bid === null) {
+              // No bids were placed
+              $message = "Your auction for Auction ID $auction_id ended without any bids being placed.";
+          } else if ($highest_bid < $reserve_price) {
+              // Reserve price not met
+              $message = "Your auction for Auction ID $auction_id ended with bids, but the reserve price of £" . number_format($reserve_price, 2) . " was not met.";
+          } else {
+              // Successful sale
+              $message = "Congratulations! Your auction for Auction ID $auction_id ended successfully with the highest bid of £" . number_format($highest_bid, 2) . " to User: $last_bidder.";
+
+              // Notify the buyer that they have won the auction
+              $buyer_message = "Congratulations! You won the auction for Auction ID $auction_id with a bid of £" . number_format($highest_bid, 2) . ".";
+              $buyer_notification_query = "INSERT INTO notifications (username, auction_id, message, type) VALUES (?, ?, ?, 'bidding')";
+              $buyer_notification_stmt = $conn->prepare($buyer_notification_query);
+              if ($buyer_notification_stmt) {
+                  $buyer_notification_stmt->bind_param("sis", $last_bidder, $auction_id, $buyer_message);
+                  $buyer_notification_stmt->execute();
+                  $buyer_notification_stmt->close();
+              }
           }
 
-          // Step 3: Find the highest bidder for the auction
-          $highest_bid_query = "SELECT username, bid_amount FROM bids WHERE auction_id = ? ORDER BY bid_amount DESC LIMIT 1";
-          $highest_bid_stmt = $conn->prepare($highest_bid_query);
-          if ($highest_bid_stmt) {
-              $highest_bid_stmt->bind_param("i", $auction_id);
-              $highest_bid_stmt->execute();
-              $highest_bid_stmt->bind_result($highest_bidder, $winning_bid);
+          // Insert the notification for the seller
+          $notification_query = "INSERT INTO notifications (username, auction_id, message, type) VALUES (?, ?, ?, 'auction')";
+          $notification_stmt = $conn->prepare($notification_query);
+          if ($notification_stmt) {
+              $notification_stmt->bind_param("sis", $username, $auction_id, $message);
+              $notification_stmt->execute();
+              $notification_stmt->close();
+          }
 
-              if ($highest_bid_stmt->fetch()) {
-                  // Step 4: Notify the highest bidder
-                  $winner_message = "Congratulations! You have won the auction for auction ID: " . $auction_id . " with a bid of £" . number_format($winning_bid, 2);
-                  $winner_type = 'auction';
-                  $winner_notification_query = "INSERT INTO notifications (username, auction_id, message, type, is_read) VALUES (?, ?, ?, ?, FALSE)";
-                  $winner_notification_stmt = $conn->prepare($winner_notification_query);
-                  if ($winner_notification_stmt) {
-                      $winner_notification_stmt->bind_param("siss", $highest_bidder, $auction_id, $winner_message, $winner_type);
-                      $winner_notification_stmt->execute();
-                      $winner_notification_stmt->close();
-                  }
-              }
-
-              // Step 5: Notify the seller that the auction has ended
-              $seller_message = "Your auction (ID: " . $auction_id . ") has ended.";
-              if (isset($highest_bidder)) {
-                  $seller_message .= " The winning bidder is " . $highest_bidder . " with a bid of £" . number_format($winning_bid, 2) . ".";
-              }
-              $seller_type = 'auction';
-              $seller_notification_query = "INSERT INTO notifications (username, auction_id, message, type, is_read) VALUES (?, ?, ?, ?, FALSE)";
-              $seller_notification_stmt = $conn->prepare($seller_notification_query);
-              if ($seller_notification_stmt) {
-                  $seller_notification_stmt->bind_param("siss", $seller_username, $auction_id, $seller_message, $seller_type);
-                  $seller_notification_stmt->execute();
-                  $seller_notification_stmt->close();
-              }
-
-              $highest_bid_stmt->close();
+          // Update the auction status to 'closed'
+          $update_query = "UPDATE auction SET auction_status = 'closed' WHERE auction_id = ?";
+          $update_stmt = $conn->prepare($update_query);
+          if ($update_stmt) {
+              $update_stmt->bind_param("i", $auction_id);
+              $update_stmt->execute();
+              $update_stmt->close();
           }
       }
 
-      $auction_end_stmt->close();
+      // Close the original statement
+      $stmt->close();
   } else {
+      // Log an error if the query preparation failed
       echo "Error updating auction status: " . $conn->error;
   }
 }
@@ -184,5 +193,4 @@ function update_watchlist_notifications($conn) {
       error_log("Failed to prepare the watchlist notification query: " . $conn->error);
   }
 }
-
 ?>
