@@ -8,12 +8,15 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-$username = $_SESSION['username'];
+// Determine the username to display
+$logged_in_username = $_SESSION['username'];
+$view_username = isset($_GET['seller_username']) ? $_GET['seller_username'] : $logged_in_username;
+
 
 // Fetch user profile information
 $user_sql = "SELECT email FROM users WHERE username = ?";
 $user_stmt = $conn->prepare($user_sql);
-$user_stmt->bind_param("s", $username);
+$user_stmt->bind_param("s", $view_username);
 $user_stmt->execute();
 $user_result = $user_stmt->get_result();
 
@@ -26,7 +29,7 @@ if ($user_result->num_rows > 0) {
 
 $profile_sql = "SELECT bank_account, delivery_address FROM profile WHERE username = ?";
 $profile_stmt = $conn->prepare($profile_sql);
-$profile_stmt->bind_param("s", $username);
+$profile_stmt->bind_param("s", $view_username);
 $profile_stmt->execute();
 $profile_result = $profile_stmt->get_result();
 
@@ -43,7 +46,7 @@ $purchases_sql = "SELECT a.auction_id, a.item_name, s.seller_username, s.sale_pr
                   JOIN auction a ON s.auction_id = a.auction_id 
                   WHERE s.buyer_username = ?";
 $purchases_stmt = $conn->prepare($purchases_sql);
-$purchases_stmt->bind_param("s", $username);
+$purchases_stmt->bind_param("s", $view_username);
 $purchases_stmt->execute();
 $purchases_result = $purchases_stmt->get_result();
 $purchases = $purchases_result->fetch_all(MYSQLI_ASSOC);
@@ -54,7 +57,7 @@ $sold_sql = "SELECT a.auction_id, a.item_name, s.buyer_username, s.sale_price
              JOIN auction a ON s.auction_id = a.auction_id 
              WHERE s.seller_username = ?";
 $sold_stmt = $conn->prepare($sold_sql);
-$sold_stmt->bind_param("s", $username);
+$sold_stmt->bind_param("s", $view_username);
 $sold_stmt->execute();
 $sold_result = $sold_stmt->get_result();
 $sold_items = $sold_result->fetch_all(MYSQLI_ASSOC);
@@ -76,7 +79,7 @@ $sold_items = $sold_result->fetch_all(MYSQLI_ASSOC);
     <table class="table table-bordered table-striped">
         <tr>
             <th style="width: 30%;">Username</th>
-            <td><?php echo htmlspecialchars($username); ?></td>
+            <td><?php echo htmlspecialchars($view_username); ?></td>
         </tr>
         <tr>
             <th>Email</th>
