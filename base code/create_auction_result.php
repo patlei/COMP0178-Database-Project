@@ -1,7 +1,7 @@
 <?php 
 include_once("header.php");
 include 'connection.php'; 
-session_start();
+// session_start();
 
 // Set PHP's default timezone to UTC
 date_default_timezone_set('UTC');
