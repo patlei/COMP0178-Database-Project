@@ -224,6 +224,16 @@ if (!$result2) {
 }
 ?>
 
+<?php
+// Query to get the sellers average rating
+$query = "SELECT average_rating FROM users WHERE username = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("s", $seller_username);
+$stmt->execute();
+$stmt->bind_result($average_rating);
+$stmt->fetch();
+$stmt->close();
+?>
 
 <div class="container">
 
@@ -251,6 +261,7 @@ if (!$result2) {
          class="btn btn-primary btn-sm">
         View Seller Profile
       </a>
+      Seller's average rating: <?php echo $average_rating ?></>
   </div>
 </div>
 <div class="row"> <!-- Row for item image and description -->
