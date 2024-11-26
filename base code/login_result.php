@@ -2,7 +2,6 @@
 include_once("header.php");
 include 'connection.php'; 
 
-session_start();
 
 // If the user is already logged in, redirect to the appropriate page
 if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {

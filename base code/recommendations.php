@@ -79,7 +79,7 @@ if (!$result) {
 <div class="container mt-5"></div>
 <!-- Main Search Results -->
 <?php if ($result->num_rows == 0): ?>
-    <p>No results found... Try again with different keywords or filters.</p>
+    <p>No recommendations found for now. Try again later.</p>
 <?php else: ?>
     <div class="row">
         <?php
@@ -90,15 +90,15 @@ if (!$result) {
             $description = $row['item_description'];
             $current_price = $row['current_price']; // Highest bid price
             $end_date = new DateTime($row['end_date']);
-            $image_path = $row['image_path'];
-
-            // Construct full image path
-            $full_image_path = IMAGE_BASE_PATH . $image_path;
-
+            $image_path = isset($row['image_path']) ? htmlspecialchars($row['image_path']) : null;
+            
+            // Check if image path is valid, else use placeholder image
+            $image_src = (!empty($image_path) && file_exists($image_path)) ? $image_path : './images/default-placeholder.png';
+            
             // Display item in a grid layout with an image
             echo "<div class='col-md-4 mb-4'>
                     <div class='card h-100'>
-                        <img src='" . $full_image_path . "' class='card-img-top' alt='Item Image' style='object-fit: cover; height: 200px;'>
+                        <img src='" . $image_src . "' class='card-img-top' alt='" . $title . "' style='object-fit: cover; height: 200px;'>
                         <div class='card-body'>
                             <h5 class='card-title'><a href='listing.php?auction_id=$auction_id'>$title</a></h5>
                             <p class='card-text'>" . htmlspecialchars($description) . "</p>

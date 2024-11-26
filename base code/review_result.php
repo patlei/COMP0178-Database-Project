@@ -31,6 +31,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Execute the statement and check for success
         if ($stmt->execute()) {
             echo "<div class='alert alert-success'>Review submitted successfully!</div>";
+            // Update the average_rating in the users table
+            $update_sql = "
+                UPDATE users u
+                SET u.average_rating = (
+                    SELECT AVG(r.rating)
+                    FROM review r
+                    WHERE r.reviewed_user = u.username
+                )
+                WHERE u.username = ?";
+            
+            if ($update_stmt = $conn->prepare($update_sql)) {
+                // Bind the username to update the average_rating for the reviewed user
+                $update_stmt->bind_param("s", $reviewed_user);
+
+                // Execute the update statement
+                if ($update_stmt->execute()) {
+                    echo "<div class='alert alert-info'>Average rating updated for user: $reviewed_user.</div>";
+                } else {
+                    echo "<div class='alert alert-warning'>Error updating average rating: " . $update_stmt->error . "</div>";
+                }
+
+                // Close the update statement
+                $update_stmt->close();
+            } else {
+                echo "<div class='alert alert-warning'>Error preparing update query: " . $conn->error . "</div>";
+            }
         } else {
             echo "<div class='alert alert-danger'>Error submitting review: " . $stmt->error . "</div>";
         }
@@ -39,6 +65,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->close();
     } else {
         echo "<div class='alert alert-danger'>Error preparing the query: " . $conn->error . "</div>";
-    }}
+    }
+}
 
 ?>

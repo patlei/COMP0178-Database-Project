@@ -14,14 +14,13 @@ if (!isset($_SESSION['username'])) {
 $username = $_SESSION['username'];
 
 // Query to get the auctions the user has bid on
-$query = "
-    SELECT a.auction_id, a.item_name, a.item_description, MAX(b.bid_amount) AS current_price, 
+$query = "SELECT a.auction_id, a.item_name, a.item_description, a.image_path, MAX(b.bid_amount) AS current_price, 
            COUNT(b.bid_id) AS num_bids, a.end_date
     FROM bids b
     JOIN auction a ON b.auction_id = a.auction_id
     WHERE b.username = ?
     GROUP BY a.auction_id
-    ORDER BY a.end_date DESC";  // You can change the ordering based on your needs
+    ORDER BY a.end_date ASC"; 
 
 $stmt = $conn->prepare($query);
 $stmt->bind_param("s", $username);  // Bind the username to the query
@@ -30,7 +29,7 @@ $result = $stmt->get_result();
 ?>
 
 <div class="container mt-5">
-    <h2 class="mb-4">Your Bids</h2> <!-- Add spacing below the header -->
+    <h2 class="mb-4">Your Bids</h2> 
     <?php
     // Check if there are any results
     if ($result->num_rows > 0) {
@@ -41,12 +40,13 @@ $result = $stmt->get_result();
             $item_id = $row['auction_id'];
             $title = $row['item_name'];
             $desc = $row['item_description'];
+            $image_path = $row['image_path'];
             $price = $row['current_price'];
             $num_bids = $row['num_bids'];
             $end_time = new DateTime($row['end_date']);  // Convert end_time to DateTime object
 
             // Use the print_listing_li function to display each auction
-            print_listing_li($item_id, $title, $desc, $price, $num_bids, $end_time);
+            print_listing_li($item_id, $title, $desc, $price, $num_bids, $end_time, $image_path);
         }
 
         echo '</ul>';  // End the list
