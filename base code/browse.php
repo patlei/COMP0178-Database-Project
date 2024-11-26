@@ -2,7 +2,6 @@
 // Include header, connection, and utility files for database and HTML functions.
 include_once("header.php");
 include_once("connection.php");
-include_once("config.php");
 require_once("utilities.php");
 
 // Retrieve search parameters, setting defaults if not provided
