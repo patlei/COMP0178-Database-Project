@@ -1,5 +1,4 @@
 <?php
-include_once("config.php");
 
 //session_start(); // Start the session to access user data
 

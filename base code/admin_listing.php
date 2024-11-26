@@ -2,7 +2,6 @@
 include_once("header_admin.php");
 include_once("connection.php");
 require_once("utilities.php");
-include_once("config.php");
 date_default_timezone_set('UTC'); // Set default timezone
 
 // Validate and fetch the auction ID from the GET request

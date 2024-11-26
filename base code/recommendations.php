@@ -1,7 +1,6 @@
 <?php include_once("header.php") // Header includes session_start()?>
 <?php require_once("utilities.php")?>
 <?php require("connection.php");  // Database connection ?>
-<?php include_once("config.php"); ?>
 
 <div class="container">
 
