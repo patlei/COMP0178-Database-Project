@@ -245,6 +245,12 @@ if (!$result2) {
       <button type="button" class="btn btn-danger btn-sm" onclick="removeFromWatchlist()">Remove watch</button>
     </div>
 <?php endif /* Print nothing otherwise */ ?>
+    <!-- Button to View Seller's Profile -->
+    <div class="mt-3">
+      <a href="profile.php?seller_username=<?php echo urlencode($seller_username); ?>" 
+         class="btn btn-primary btn-sm">
+        View Seller Profile
+      </a>
   </div>
 </div>
 <div class="row"> <!-- Row for item image and description -->
