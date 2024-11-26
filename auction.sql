@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `password` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
   `average_rating` int(100) UNSIGNED NOT NULL DEFAULT 0,
   `accountType` varchar(30) DEFAULT 'user',
+  `blocked` BOOLEAN NOT NULL DEFAULT FALSE,
   PRIMARY KEY (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -370,24 +371,28 @@ CREATE TABLE IF NOT EXISTS `review` (
 
 -- Table structure for table `profile`
 
-CREATE TABLE IF NOT EXISTS `profile` (
+CREATE TABLE `profile` (
     `profile_id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     `username` VARCHAR(30) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+    `sort_code` VARCHAR(10), -- Added sort_code column
     `bank_account` VARCHAR(50) NOT NULL,
+    `phone_number` VARCHAR(15), -- Added phone_number column
     `delivery_address` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+    `postcode` VARCHAR(20),
     PRIMARY KEY (`profile_id`),
     FOREIGN KEY (`username`) REFERENCES `users`(`username`) 
         ON DELETE CASCADE 
         ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO `profile` (`username`, `bank_account`, `delivery_address`)
+INSERT INTO `profile` (`username`, `sort_code`, `bank_account`, `phone_number`, `delivery_address`,`postcode`)
 VALUES
-    ('ola', '1234567890123456', '123 Main St, Springfield'),
-    ('rachel', '9876543210987654', '456 Elm St, Shelbyville'),
-    ('jingyi', '5678901234567890', '789 Oak St, Capital City'),
-    ('user4', '3456783452345678', '792 oxford St, London'),
-    ('user5', '9876534523456666', '456 Refent St, London');
+    ('ola', '400106', '23400123', '07368598774', 'Gower St, London', 'WC1E 6AE'),
+    ('rachel', '400106', '23400145', '07472856294', 'wellington Square, oxford', 'OX1 2JD'),
+    ('jingyi', '040003', '78950345', '07274957305', 'Ivor court , London', 'EC4 5AS'),
+    ('user4', '400106', '56787343', '07397294730', 'Oxford Rd, Manchester', 'M13 9PL'),
+    ('user5', '040003', '34587247', '07930467239', '221B Baker St, London', 'NW1 6XE');
+
 
 
 -- --------------------------------------------------------

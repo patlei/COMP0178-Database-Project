@@ -66,7 +66,7 @@ if ($_SESSION['logged_in'] && isset($_SESSION['username'])) {
 <!-- Top Navbar -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container-fluid">
-    <a class="navbar-brand d-flex align-items-center" href="index.php">
+    <a class="navbar-brand d-flex align-items-center" href="admin_browse.php"> 
       <img src="../icon.jpg" alt="Knitty Gritty Logo" style="height: 60px; width: auto; margin-right: 10px;">
       <span class="store-title">Knitty Gritty</span>
     </a>
@@ -79,32 +79,19 @@ if ($_SESSION['logged_in'] && isset($_SESSION['username'])) {
       <ul class="navbar-nav ml-auto">
         <!-- Search Form -->
         <li class="nav-item">
-          <form class="form-inline my-2 my-lg-0" method="GET" action="browse.php">
+          <form class="form-inline my-2 my-lg-0" method="GET" action="admin_browse.php">
             <input class="form-control mr-sm-2" type="text" name="keyword" placeholder="Search listings" aria-label="Search">
             <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
           </form>
         </li>
 
         <?php if ($_SESSION['logged_in']): ?>
-          <!-- Notification Icon with unread badge -->
-          <li class="nav-item mx-2">
-              <a class="nav-link position-relative" href="notifications.php" title="<?php echo $unread_count > 0 ? $unread_count . ' unread notifications' : 'No new notifications'; ?>">
-                  <i class="fa fa-bell"></i>
-                  <?php if ($unread_count > 0): ?>
-                      <span id="unread-count" class="badge badge-danger position-absolute" style="top: -10px; right: -10px;"><?php echo $unread_count; ?></span>
-                  <?php endif; ?>
-              </a>
-          </li>
-          
           <!-- User Dropdown -->
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               <i class="fa fa-user"></i> <?php echo htmlspecialchars($_SESSION['username']); ?>
             </a>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
-              <a class="dropdown-item" href="profile.php">My Profile</a>
-              <a class="dropdown-item" href="settings.php">Settings</a>
-              <div class="dropdown-divider"></div>
               <a class="dropdown-item" href="logout.php">Logout</a>
             </div>
           </li>

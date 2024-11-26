@@ -24,7 +24,7 @@ if ($user_result->num_rows > 0) {
     exit();
 }
 
-$profile_sql = "SELECT bank_account, delivery_address FROM profile WHERE username = ?";
+$profile_sql = "SELECT sort_code, bank_account, phone_number, delivery_address, postcode FROM profile WHERE username = ?";
 $profile_stmt = $conn->prepare($profile_sql);
 $profile_stmt->bind_param("s", $username);
 $profile_stmt->execute();
@@ -83,12 +83,24 @@ $sold_items = $sold_result->fetch_all(MYSQLI_ASSOC);
             <td><?php echo htmlspecialchars($user['email']); ?></td>
         </tr>
         <tr>
+            <th>Sort Code</th>
+            <td><?php echo htmlspecialchars($profile['sort_code']); ?></td>
+        </tr>
+        <tr>
             <th>Bank Account</th>
             <td><?php echo htmlspecialchars($profile['bank_account']); ?></td>
         </tr>
         <tr>
+            <th>Phone Number</th>
+            <td><?php echo htmlspecialchars($profile['phone_number']); ?></td>
+        </tr>
+        <tr>
             <th>Delivery Address</th>
             <td><?php echo htmlspecialchars($profile['delivery_address']); ?></td>
+        </tr>
+        <tr>
+            <th>Postcode</th>
+            <td><?php echo htmlspecialchars($profile['postcode']); ?></td>
         </tr>
     </table>
 </div>
@@ -105,7 +117,7 @@ $sold_items = $sold_result->fetch_all(MYSQLI_ASSOC);
                 </tr>
                 <tr>
                     <th>Item Name</th>
-                    <td><?php echo htmlspecialchars($purchase['item_name']); ?></td>
+                    <td><a href="listing.php?auction_id=<?php echo htmlspecialchars($purchase['auction_id']); ?>"><?php echo htmlspecialchars($purchase['item_name']); ?></a></td>
                 </tr>
                 <tr>
                     <th>Seller Username</th>
@@ -133,7 +145,7 @@ $sold_items = $sold_result->fetch_all(MYSQLI_ASSOC);
                 </tr>
                 <tr>
                     <th>Item Name</th>
-                    <td><?php echo htmlspecialchars($sold['item_name']); ?></td>
+                    <td><a href="listing.php?auction_id=<?php echo htmlspecialchars($sold['auction_id']); ?>"><?php echo htmlspecialchars($sold['item_name']); ?></a></td>
                 </tr>
                 <tr>
                     <th>Buyer Username</th>
