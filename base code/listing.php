@@ -235,241 +235,232 @@ $stmt->fetch();
 $stmt->close();
 ?>
 
-<div class="container">
+<!-- Main container -->
+<div class="container mt-4 px-3 py-4"> 
 
-<div class="row"> <!-- Row #1 with auction title + watch button -->
-  <div class="col-sm-8"> <!-- Left col -->
-    <h2 class="my-3"><?php echo($title); ?></h2>
-  </div>
-  <div class="col-sm-4 align-self-center"> <!-- Right col -->
-<?php
-  /* The following watchlist functionality uses JavaScript, but could
-     just as easily use PHP as in other places in the code */
-  if ($now < $end_time):
-?>
-    <div id="watch_nowatch" <?php if ($has_session && $watching) echo('style="display: none"');?> >
-      <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addToWatchlist()">+ Add to watchlist</button>
-    </div>
-    <div id="watch_watching" <?php if (!$has_session || !$watching) echo('style="display: none"');?> >
-      <button type="button" class="btn btn-success btn-sm" disabled>Watching</button>
-      <button type="button" class="btn btn-danger btn-sm" onclick="removeFromWatchlist()">Remove watch</button>
-    </div>
-<?php endif /* Print nothing otherwise */ ?>
-    <!-- Button to View Seller's Profile -->
-    <div class="mt-3">
-      <a href="profile.php?seller_username=<?php echo urlencode($seller_username); ?>" 
-         class="btn btn-primary btn-sm">
-        View Seller Profile
-      </a>
-      Seller's average rating: <?php echo $average_rating ?></>
-  </div>
-</div>
-<div class="row"> <!-- Row for item image and description -->
-    <div class="col-sm-4"> <!-- Left column for image -->
-      <?php if (!empty($image_path) && file_exists($image_path)): ?>
-          <?php
-            // Generate the image HTML
-            $image_src = htmlspecialchars($image_path);
-            $image_html = '<img src="' . $image_src . '" alt="' . htmlspecialchars($title) . '" class="img-thumbnail" style="width: 150px; height: auto; margin-right: 15px;">';
-            echo $image_html;
-          ?>
-      <?php else: ?>
-          <?php
-            // Use placeholder if image path is invalid or empty
-            $image_src = './images/default-placeholder.png';
-            $image_html = '<img src="' . $image_src . '" alt="Placeholder Image" class="img-thumbnail" style="width: 150px; height: auto; margin-right: 15px;">';
-            echo $image_html;
-          ?>
-      <?php endif; ?>
-      </div>
-<div class="row"> <!-- Row #2 with auction information + bidding info -->
-  <div class="col-sm-8"> <!-- Left col with item info -->
+    <div class="row"> <!-- Main row with two columns -->
 
-    <div class="itemDescription">
-    <p><strong>Description:</strong> <?php echo($description); ?></p>
+        <!-- Left column: Listing details -->
+        <div class="col-md-7"> 
+            <h2 class="my-3"><?php echo($title); ?></h2>
 
-    <!-- Item Information -->
-    <p><strong>Category:</strong> <?php echo($category); ?></p>
-      <p><strong>Size:</strong> <?php echo($size); ?></p>
-      <p><strong>Material:</strong> <?php echo($material); ?></p>
-      <p><strong>Color:</strong> <?php echo($color); ?></p>
-      <p><strong>Condition:</strong> <?php echo($condition); ?></p>
-      <p><strong>Views:</strong> <?php echo($views); ?></p>
-    </div>
-
-  </div>
-
-  <div class="col-sm-4"> <!-- Right col with bidding info -->
-
-    <p>
-<?php if ($now > $end_time): ?>
-  <?php 
-    // If no bids or reserve price not met, display "ended without a sale"
-    if ($num_bids == 0 || ($reserve_price > 0 && $current_price < $reserve_price)): ?>
-        <!-- Auction ended without a sale -->
-        This auction ended without a sale on <?php echo date_format($end_time, 'j M H:i'); ?>
-        <?php if ($num_bids == 0): ?>
-            No bids were placed.
-        <?php endif; ?>
-        <?php if ($reserve_price > 0 && $current_price < $reserve_price): ?>
-            The reserve price of £<?php echo number_format($reserve_price, 2); ?> was not met.
-        <?php endif; ?>
-  <?php else: ?>
-        <!-- Auction ended with a sale -->
-        This auction ended <?php echo date_format($end_time, 'j M H:i'); ?><br>
-        Sold for £<?php echo number_format($current_price, 2); ?> to User: <?php echo($highest_bidder)?>
-        <!--Display review form button for seller and buyer -->
-        <?php // Check if the user has already submitted a review for this auction
-        $query_review_check = "SELECT COUNT(*) FROM review WHERE auction_id = ? AND review_author = ?";
-        $stmt_review_check = $conn->prepare($query_review_check);
-        $stmt_review_check->bind_param("is", $auction_id, $username); // 'i' for integer, 's' for string
-        $stmt_review_check->execute();
-        $stmt_review_check->bind_result($review_count);
-        $stmt_review_check->fetch();
-        $stmt_review_check->close();
-        // If review_count > 0, user has already submitted a review for this auction
-        $has_reviewed = ($review_count > 0);
-        ?>
-        <?php if ($username === $seller_username || $username === $highest_bidder): ?>
-          <?php if (!$has_reviewed): // Only show the review button if the user hasn't reviewed ?>
-            <div style="margin-top: 10px;">
-              <a href="review.php?auction_id=<?php echo $auction_id; ?>&seller_username=<?php echo urlencode($seller_username); ?>&highest_bidder=<?php echo urlencode($highest_bidder); ?>" class="btn btn-primary">Add Review</a>
+            <!-- Listing Image -->
+            <div class="mb-4">
+                <?php if (!empty($image_path) && file_exists($image_path)): ?>
+                    <img src="<?php echo htmlspecialchars($image_path); ?>" 
+                         alt="<?php echo htmlspecialchars($title); ?>" 
+                         class="img-fluid img-thumbnail" style="max-width: 300px;">
+                <?php else: ?>
+                    <img src="./images/default-placeholder.png" 
+                         alt="Placeholder Image" 
+                         class="img-fluid img-thumbnail" style="max-width: 300px;">
+                <?php endif; ?>
             </div>
-          <?php endif; ?>
-        <?php endif; ?>
-        <?php
-        // Register the sale in the database
-        if ($auction_status === 'closed' && $num_bids > 0) {
-          // Check if auction_id is in table sales
-          $check_sale = "SELECT COUNT(*) FROM sales WHERE auction_id = ?";
-          $stmt = $conn->prepare($check_sale);
-          if ($stmt) {
-              // Bind parameter
-              $stmt->bind_param("d", $auction_id);
-      
-              // Execute the query
-              $stmt->execute();
-              $stmt->bind_result($count);
-              $stmt->fetch();
-              $stmt->close();
 
-              if ($count == 0) {
-                // if auction_id not in sales yet, proceed to insert
-                  $add_sale = "INSERT INTO sales (auction_id, seller_username, buyer_username, sale_price)
-                                VALUES (?, ?, ?, ?)";
-                  $stmt = $conn->prepare($add_sale);
-                  if ($stmt) {
-                      // Bind parameters
-                      $stmt->bind_param("dssd", $auction_id, $seller_username, $highest_bidder, $current_price);
+            <!-- Listing Information -->
+            <div class="itemDescription">
+                <p><strong>Description:</strong> <?php echo($description); ?></p>
+                <p><strong>Category:</strong> <?php echo($category); ?></p>
+                <p><strong>Size:</strong> <?php echo($size); ?></p>
+                <p><strong>Material:</strong> <?php echo($material); ?></p>
+                <p><strong>Color:</strong> <?php echo($color); ?></p>
+                <p><strong>Condition:</strong> <?php echo($condition); ?></p>
+                <p><strong>Views:</strong> <?php echo($views); ?></p>
+            </div>
+        </div>
 
-                      // Execute the statement
-                      if ($stmt->execute()) {
-                          echo "Sale successfully registered!";
-                      } else {
-                          echo "Error inserting data: " . $stmt->error;
-                      }
+        <!-- Right column: Watchlist, Seller profile, auction details, and bidding section -->
+        <div class="col-md-5"> 
 
-                      // Close the prepared statement
-                      $stmt->close();
+            <!-- Watchlist and Seller Info -->
+            <div class="mb-4">
+                <?php if ($now < $end_time): ?>
+                    <div id="watch_nowatch" <?php if ($has_session && $watching) echo('style="display: none"'); ?>>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addToWatchlist()">+ Add to watchlist</button>
+                    </div>
+                    <div id="watch_watching" <?php if (!$has_session || !$watching) echo('style="display: none"'); ?>>
+                        <button type="button" class="btn btn-success btn-sm" disabled>Watching</button>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="removeFromWatchlist()">Remove watch</button>
+                    </div>
+                <?php endif; ?>
+                <div class="mt-3">
+                    <p class="mt-2 mb-0">Seller's average rating: <?php echo $average_rating; ?></p>
+                    <a href="profile.php?seller_username=<?php echo urlencode($seller_username); ?>" 
+                       class="btn btn-primary btn-sm">
+                       View Seller Profile
+                    </a>
+                  </div>
+            </div>
+
+            <!-- Auction Ending Details -->
+            <div class="auction-info mb-4">
+            <?php if ($now > $end_time): ?>
+                <?php 
+                  // If no bids or reserve price not met, display "ended without a sale"
+                  if ($num_bids == 0 || ($reserve_price > 0 && $current_price < $reserve_price)): ?>
+                      <!-- Auction ended without a sale -->
+                      This auction ended without a sale on <?php echo date_format($end_time, 'j M H:i'); ?>
+                      <?php if ($num_bids == 0): ?>
+                          No bids were placed.
+                      <?php endif; ?>
+                      <?php if ($reserve_price > 0 && $current_price < $reserve_price): ?>
+                          The reserve price of £<?php echo number_format($reserve_price, 2); ?> was not met.
+                      <?php endif; ?>
+                <?php else: ?>
+                      <!-- Auction ended with a sale -->
+                      This auction ended <?php echo date_format($end_time, 'j M H:i'); ?><br>
+                      Sold for £<?php echo number_format($current_price, 2); ?> to User: <?php echo($highest_bidder)?>
+                      <!--Display review form button for seller and buyer -->
+                      <?php // Check if the user has already submitted a review for this auction
+                      $query_review_check = "SELECT COUNT(*) FROM review WHERE auction_id = ? AND review_author = ?";
+                      $stmt_review_check = $conn->prepare($query_review_check);
+                      $stmt_review_check->bind_param("is", $auction_id, $username); // 'i' for integer, 's' for string
+                      $stmt_review_check->execute();
+                      $stmt_review_check->bind_result($review_count);
+                      $stmt_review_check->fetch();
+                      $stmt_review_check->close();
+                      // If review_count > 0, user has already submitted a review for this auction
+                      $has_reviewed = ($review_count > 0);
+                      ?>
+                      <?php if ($username === $seller_username || $username === $highest_bidder): ?>
+                        <?php if (!$has_reviewed): // Only show the review button if the user hasn't reviewed ?>
+                          <div style="margin-top: 10px;">
+                            <a href="review.php?auction_id=<?php echo $auction_id; ?>&seller_username=<?php echo urlencode($seller_username); ?>&highest_bidder=<?php echo urlencode($highest_bidder); ?>" class="btn btn-primary">Add Review</a>
+                          </div>
+                        <?php endif; ?>
+                      <?php endif; ?>
+                      <?php
+                      // Register the sale in the database
+                      if ($auction_status === 'closed' && $num_bids > 0) {
+                        // Check if auction_id is in table sales
+                        $check_sale = "SELECT COUNT(*) FROM sales WHERE auction_id = ?";
+                        $stmt = $conn->prepare($check_sale);
+                        if ($stmt) {
+                            // Bind parameter
+                            $stmt->bind_param("d", $auction_id);
+                    
+                            // Execute the query
+                            $stmt->execute();
+                            $stmt->bind_result($count);
+                            $stmt->fetch();
+                            $stmt->close();
+
+                            if ($count == 0) {
+                              // if auction_id not in sales yet, proceed to insert
+                                $add_sale = "INSERT INTO sales (auction_id, seller_username, buyer_username, sale_price)
+                                              VALUES (?, ?, ?, ?)";
+                                $stmt = $conn->prepare($add_sale);
+                                if ($stmt) {
+                                    // Bind parameters
+                                    $stmt->bind_param("dssd", $auction_id, $seller_username, $highest_bidder, $current_price);
+
+                                    // Execute the statement
+                                    if ($stmt->execute()) {
+                                        echo "Sale successfully registered!";
+                                    } else {
+                                        echo "Error inserting data: " . $stmt->error;
+                                    }
+
+                                    // Close the prepared statement
+                                    $stmt->close();
+                                  } else {
+                                    echo "Error preparing statement: " . $conn->error;
+                                }
+                                // Execute the SQL query to insert the sale
+                                $sale = $conn->query($addsale);
+                                // Check if the query execution resulted in an error
+                                if (!$sale) {
+                                  echo "<div class='alert alert-danger'>Oops! Something went wrong while fetching the results. Please try again later.</div>";
+                                };
+                            } // Don't need to inform the user that the sale has been registered previously
+                        } else {
+                            echo "Error preparing check statement: " . $conn->error;
+                        }
+                      } endif
+                      ?>
+              <?php else: ?>
+                  Auction ends <?php echo(date_format($end_time, 'j M H:i') . $time_remaining) ?></>  
+                  <p class="lead">Current price: £<?php echo(number_format($current_price, 2)) ?></p>
+                  <p><strong>Number of Bids:</strong> <?php echo($num_bids); ?></p>
+                  <!-- Displaying message for the user if their bid is the highest -->
+                  <?php if (isset($_SESSION['username']) && $_SESSION['username'] === $highest_bidder): ?>
+                    <p class="text-success">Highest bid is yours!</p>
+                  <?php endif; ?>
+
+                  <?php 
+                  if (isset($_SESSION['username'])) {
+                  $username = $_SESSION['username'];
+
+                      // Check if the logged-in user is NOT the seller
+                      if ($username !== $seller_username) {
+                        ?>
+
+                        <!-- Bidding form -->
+                        <form method="POST" action="place_bid.php">
+                          <div class="input-group">
+                            <div class="input-group-prepend">
+                              <span class="input-group-text">£</span>
+                            </div>
+                            <input type="number" class="form-control" id="bid" name="bid" required>
+                          </div>
+                          <!-- Hidden auction_id -->
+                          <input type="hidden" name="auction_id" value="<?php echo $_GET['auction_id']; ?>">
+                          <button type="submit" class="btn btn-primary form-control">Place bid</button>
+                        </form>
+                        <?php
                     } else {
-                      echo "Error preparing statement: " . $conn->error;
-                  }
-                  // Execute the SQL query to insert the sale
-                  $sale = $conn->query($addsale);
-                  // Check if the query execution resulted in an error
-                  if (!$sale) {
-                    echo "<div class='alert alert-danger'>Oops! Something went wrong while fetching the results. Please try again later.</div>";
-                  };
-              } // Don't need to inform the user that the sale has been registered previously
-          } else {
-              echo "Error preparing check statement: " . $conn->error;
-          }
-        } endif
-        ?>
-<?php else: ?>
-     Auction ends <?php echo(date_format($end_time, 'j M H:i') . $time_remaining) ?></>  
-    <p class="lead">Current price: £<?php echo(number_format($current_price, 2)) ?></p>
-    <p><strong>Number of Bids:</strong> <?php echo($num_bids); ?></p>
-    <!-- Displaying message for the user if their bid is the highest -->
-    <?php if (isset($_SESSION['username']) && $_SESSION['username'] === $highest_bidder): ?>
-      <p class="text-success">Highest bid is yours!</p>
-    <?php endif; ?>
+                        // Show a message for the seller
+                        echo "<p class='text-muted'>You cannot bid on your own auction.</p>";
+                    }
+                  } else {
+                    // Message for non-logged-in users
+                    echo "<p class='text-muted'>Please <a href='login.php'>log in</a> to place a bid.</p>";
+                  } ?>
 
-    <?php 
-    if (isset($_SESSION['username'])) {
-    $username = $_SESSION['username'];
-
-    // Check if the logged-in user is NOT the seller
-    if ($username !== $seller_username) {
-        ?>
-        <!-- Bidding form -->
-        <form method="POST" action="place_bid.php">
-          <div class="input-group">
-            <div class="input-group-prepend">
-              <span class="input-group-text">£</span>
+                  <?php endif ?>
             </div>
-            <input type="number" class="form-control" id="bid" name="bid" required>
-          </div>
-          <!-- Hidden auction_id -->
-          <input type="hidden" name="auction_id" value="<?php echo $_GET['auction_id']; ?>">
-          <button type="submit" class="btn btn-primary form-control">Place bid</button>
-        </form>
-        <?php
-    } else {
-        // Show a message for the seller
-        echo "<p class='text-muted'>You cannot bid on your own auction.</p>";
-    }
-} else {
-    // Message for non-logged-in users
-    echo "<p class='text-muted'>Please <a href='login.php'>log in</a> to place a bid.</p>";
-} ?>
+        </div> <!-- End of Right Column -->
 
-<?php endif ?>
-
-  
-  </div> <!-- End of right col with bidding info -->
-
-</div> <!-- End of row #2 -->
+    </div> <!-- End of Main Row -->
 
     <!-- Auctions by the same user -->
-<div class="container mt-5 sameuser-listings">
-<h3>Other auctions by this user:</h3>
-<div class="scrolling-wrapper row flex-row flex-nowrap mt-4 pb-4 pt-2">
-    <?php if ($result2->num_rows == 0): ?>
-      <p>No results found... Try again with different keywords or filters.</p>
-  <?php else: ?>
-      <div class="row">
-          <?php
-          // Loop through each result and display it using the utility function
-          while ($row = $result2->fetch_assoc()) {
-            $image_path = isset($row['image_path']) ? htmlspecialchars($row['image_path']) : null;
-            
-            // Check if image path is valid, else use placeholder image
-            $image_src = (!empty($image_path) && file_exists($image_path)) ? $image_path : './images/default-placeholder.png';
-            
-            echo '<div class="col-3">
-                    <div class="card h-100">
-                        <img src="' . $image_src. '" class="card-img-top" alt="' . htmlspecialchars($row['item_name']) . '">
-                        <div class="card-body">
-                            <h5 class="card-title">' . htmlspecialchars($row['item_name']) . '</h5>
-                            <p class="card-text"><strong>Current Price: £' . number_format($row['current_price'], 2) . '</strong></p>
-                            <p class="text-muted">Views: ' . number_format($row['views']) . '</p>
+    <div class="container mt-5 sameuser-listings">
+    <h3>Other auctions by this user:</h3>
+    <div class="scrolling-wrapper row flex-row flex-nowrap mt-4 pb-4 pt-2">
+        <?php if ($result2->num_rows == 0): ?>
+          <p>No results found... Try again with different keywords or filters.</p>
+      <?php else: ?>
+          <div class="row">
+              <?php
+              // Loop through each result and display it using the utility function
+              while ($row = $result2->fetch_assoc()) {
+                $image_path = isset($row['image_path']) ? htmlspecialchars($row['image_path']) : null;
+                
+                // Check if image path is valid, else use placeholder image
+                $image_src = (!empty($image_path) && file_exists($image_path)) ? $image_path : './images/default-placeholder.png';
+                
+                echo '<div class="col-3">
+                        <div class="card h-100">
+                            <img src="' . $image_src. '" class="card-img-top" alt="' . htmlspecialchars($row['item_name']) . '">
+                            <div class="card-body">
+                                <h5 class="card-title">' . htmlspecialchars($row['item_name']) . '</h5>
+                                <p class="card-text"><strong>Current Price: £' . number_format($row['current_price'], 2) . '</strong></p>
+                                <p class="text-muted">Views: ' . number_format($row['views']) . '</p>
+                            </div>
+                            <div class="card-footer text-center">
+                                <a href="listing.php?auction_id=' . $row['auction_id'] . '" class="btn btn-primary">View Listing</a>
+                            </div>
                         </div>
-                        <div class="card-footer text-center">
-                            <a href="listing.php?auction_id=' . $row['auction_id'] . '" class="btn btn-primary">View Listing</a>
-                        </div>
-                    </div>
-                </div>';}
-            ?>
-        </div>
-  <?php endif; ?>
-</div>
+                    </div>';}
+                ?>
+            </div>
+      <?php endif; ?>
+    </div>
 
-<?php include_once("footer.php")?>
+</div> <!-- End of Main Container -->
 
-<!-- validate the bid if higher than current price before submitting the form -->
+<!-- JavaScript function to validate the bid if higher than current price before submitting the form -->
 <script>
-  // JavaScript function to validate the bid
   $("form").submit(function(e) {
       var bidAmount = parseFloat($("#bid").val()); // Get the bid amount entered by the user
       var currentBid = <?php echo($current_price); ?>; // The current bid value fetched from the server
@@ -479,12 +470,7 @@ $stmt->close();
           alert("Your bid must be higher than the current bid.");
       }
   });
-</script>
 
-</div> <!-- End of container -->
-
-
-<script> 
 // JavaScript functions: addToWatchlist and removeFromWatchlist.
 function addToWatchlist(button) {
   $.ajax('watchlist_funcs.php', {
@@ -508,7 +494,6 @@ function addToWatchlist(button) {
   });
 }
 
-
 function removeFromWatchlist(button) {
   $.ajax('watchlist_funcs.php', {
     type: "POST",
@@ -530,5 +515,6 @@ function removeFromWatchlist(button) {
     }
   });
 }
-
 </script>
+    
+<?php include_once("footer.php")?>
