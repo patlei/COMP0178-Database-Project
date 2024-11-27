@@ -1,5 +1,15 @@
 <?php include_once("header.php"); ?>
 
+<?php
+if (isset($_GET['success']) && $_GET['success'] == 1) {
+    echo "<script>
+        alert('Your registration is successful. You will be directed to the login page.');
+        window.location.href = 'login.php';
+    </script>";
+    exit();
+}
+?>
+
 <div class="container">
     <h2 class="my-3">Register new account</h2>
 

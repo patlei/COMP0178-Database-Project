@@ -94,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         );
 
         if ($stmt->execute()) {
-            // Redirect to success page
+            // Redirect with success flag
             header("Location: register.php?success=1");
             exit();
         } else {
