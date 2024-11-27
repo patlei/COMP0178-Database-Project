@@ -4,9 +4,21 @@
     <h2 class="my-3">Register new account</h2>
 
     <?php
+    // Display error message if present
     if (isset($_GET['error'])) {
         echo "<div class='alert alert-danger'>" . htmlspecialchars($_GET['error']) . "</div>";
     }
+
+    // Retain previously entered form values
+    $username = $_GET['username'] ?? '';
+    $email = $_GET['email'] ?? '';
+    $sortcode = $_GET['sortcode'] ?? '';
+    $bankaccount = $_GET['bankaccount'] ?? '';
+    $phonenumber = $_GET['phonenumber'] ?? '';
+    $address_line1 = $_GET['address-line1'] ?? '';
+    $address_line2 = $_GET['address-line2'] ?? '';
+    $city = $_GET['city'] ?? '';
+    $postcode = $_GET['postcode'] ?? '';
     ?>
 
     <form action="process_registration.php" method="post">
@@ -14,7 +26,7 @@
         <div class="form-group row">
             <label for="username" class="col-sm-2 col-form-label text-right">Username</label>
             <div class="col-sm-10">
-                <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
+                <input type="text" class="form-control" id="username" name="username" placeholder="Username" value="<?php echo htmlspecialchars($username); ?>" required>
                 <small id="usernameHelp" class="form-text text-muted"><span class="text-danger">* Required.</span></small>
             </div>
         </div>
@@ -23,8 +35,8 @@
         <div class="form-group row">
             <label for="email" class="col-sm-2 col-form-label text-right">Email</label>
             <div class="col-sm-10">
-                <input type="email" class="form-control" id="email" name="email" placeholder="Email" required>
-                <small id="emailHelp" class="form-text text-muted"><span class="text-danger">* Required, must be a valid email address. </span></small>
+                <input type="email" class="form-control" id="email" name="email" placeholder="Email" value="<?php echo htmlspecialchars($email); ?>" required>
+                <small id="emailHelp" class="form-text text-muted"><span class="text-danger">* Required, must be a valid email address.</span></small>
             </div>
         </div>
 
@@ -48,52 +60,50 @@
 
         <!-- Sort Code -->
         <div class="form-group row">
-            <label for="sort code" class="col-sm-2 col-form-label text-right">Sort Code</label>
+            <label for="sortcode" class="col-sm-2 col-form-label text-right">Sort Code</label>
             <div class="col-sm-10">
-                <input type="sortcode" class="form-control" id="sortcode" name="sortcode" placeholder="Sort Code" required>
+                <input type="text" class="form-control" id="sortcode" name="sortcode" placeholder="Sort Code" value="<?php echo htmlspecialchars($sortcode); ?>" required>
                 <small id="sortcodeHelp" class="form-text text-muted"><span class="text-danger">* Required, must be 6 digits.</span></small>
             </div>
         </div>
 
         <!-- Bank Account -->
         <div class="form-group row">
-            <label for="bank account" class="col-sm-2 col-form-label text-right">Bank Account</label>
+            <label for="bankaccount" class="col-sm-2 col-form-label text-right">Bank Account</label>
             <div class="col-sm-10">
-                <input type="bankaccount" class="form-control" id="bankaccount" name="bankaccount" placeholder="Bank Account" required>
+                <input type="text" class="form-control" id="bankaccount" name="bankaccount" placeholder="Bank Account" value="<?php echo htmlspecialchars($bankaccount); ?>" required>
                 <small id="bankaccountHelp" class="form-text text-muted"><span class="text-danger">* Required, must be 8 digits.</span></small>
             </div>
         </div>
 
         <!-- Phone Number -->
         <div class="form-group row">
-            <label for="phone number" class="col-sm-2 col-form-label text-right">Phone Number</label>
+            <label for="phonenumber" class="col-sm-2 col-form-label text-right">Phone Number</label>
             <div class="col-sm-10">
-                <input type="phonenumber" class="form-control" id="phonenumber" name="phonenumber" placeholder="Phone Number" required>
+                <input type="text" class="form-control" id="phonenumber" name="phonenumber" placeholder="Phone Number" value="<?php echo htmlspecialchars($phonenumber); ?>" required>
                 <small id="phonenumberHelp" class="form-text text-muted"><span class="text-danger">* Required, must start with 07.</span></small>
             </div>
         </div>
 
-
         <!-- Delivery Address -->
         <div class="form-group row">
             <label for="address-line1" class="col-sm-2 col-form-label text-right">Delivery Address</label>
-             <div class="col-sm-10">
-                <input type="text" class="form-control" id="address-line1" name="address-line1" placeholder="First Line" required>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="address-line1" name="address-line1" placeholder="First Line" value="<?php echo htmlspecialchars($address_line1); ?>" required>
                 <small class="form-text text-muted"><span class="text-danger">* Required.</span></small>
             </div>
         </div>
         <div class="form-group row">
             <label for="address-line2" class="col-sm-2 col-form-label text-right"></label>
             <div class="col-sm-10">
-                <input type="text" class="form-control" id="address-line2" name="address-line2" placeholder="Second Line">
+                <input type="text" class="form-control" id="address-line2" name="address-line2" placeholder="Second Line" value="<?php echo htmlspecialchars($address_line2); ?>">
                 <small class="form-text text-muted">Optional.</small>
             </div>
         </div>
-
         <div class="form-group row">
-            <label for="city" class="col-sm-2 col-form-label text-right"></label>
+            <label for="city" class="col-sm-2 col-form-label text-right">City</label>
             <div class="col-sm-10">
-                <input type="text" class="form-control" id="city" name="city" placeholder="City" required>
+                <input type="text" class="form-control" id="city" name="city" placeholder="City" value="<?php echo htmlspecialchars($city); ?>" required>
                 <small class="form-text text-muted"><span class="text-danger">* Required.</span></small>
             </div>
         </div>
@@ -102,7 +112,7 @@
         <div class="form-group row">
             <label for="postcode" class="col-sm-2 col-form-label text-right">Postcode</label>
             <div class="col-sm-10">
-                <input type="postcode" class="form-control" id="postcode" name="postcode" placeholder="Postcode" required>
+                <input type="text" class="form-control" id="postcode" name="postcode" placeholder="Postcode" value="<?php echo htmlspecialchars($postcode); ?>" required>
                 <small id="postcodeHelp" class="form-text text-muted"><span class="text-danger">* Required.</span></small>
             </div>
         </div>
@@ -117,16 +127,5 @@
 
     <div class="text-center">Already have an account? <a href="login.php">Login</a></div>
 </div>
-
-<script>
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('success')) {
-        alert("Register successfully, you will be guided to login.");
-
-        setTimeout(() => {
-            window.location.href = "login.php";
-        }, 1000);
-    }
-</script>
 
 <?php include_once("footer.php"); ?>

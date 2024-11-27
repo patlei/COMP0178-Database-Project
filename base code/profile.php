@@ -1,5 +1,6 @@
 <?php
-session_start();
+include("header.php"); 
+
 require_once("connection.php");
 
 if (!isset($_SESSION['username'])) {
@@ -14,7 +15,7 @@ $view_username = isset($_GET['seller_username']) ? $_GET['seller_username'] : $l
 
 
 // Fetch user profile information
-$user_sql = "SELECT email FROM users WHERE username = ?";
+$user_sql = "SELECT email, average_rating FROM users WHERE username = ?";
 $user_stmt = $conn->prepare($user_sql);
 $user_stmt->bind_param("s", $view_username);
 $user_stmt->execute();
@@ -61,6 +62,16 @@ $sold_stmt->bind_param("s", $view_username);
 $sold_stmt->execute();
 $sold_result = $sold_stmt->get_result();
 $sold_items = $sold_result->fetch_all(MYSQLI_ASSOC);
+
+// Fetch User Reviews
+$reviews_sql = "SELECT auction_id, review_author, reviewed_user, review, rating 
+                FROM review
+                WHERE review_author = ? OR reviewed_user = ?";
+$reviews_stmt = $conn->prepare($reviews_sql);
+$reviews_stmt->bind_param("ss", $view_username, $view_username);
+$reviews_stmt->execute();
+$reviews_result = $reviews_stmt->get_result();
+$reviews = $reviews_result->fetch_all(MYSQLI_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -68,14 +79,14 @@ $sold_items = $sold_result->fetch_all(MYSQLI_ASSOC);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Personal Information</title>
+    <title>User Profile</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css">
 </head>
 <body>
-<?php include("header.php"); ?>
+
 
 <div class="container mt-5">
-    <h2>My Personal Information</h2>
+    <h2>User Personal Information</h2>
     <table class="table table-bordered table-striped">
         <tr>
             <th style="width: 30%;">Username</th>
@@ -85,6 +96,12 @@ $sold_items = $sold_result->fetch_all(MYSQLI_ASSOC);
             <th>Email</th>
             <td><?php echo htmlspecialchars($user['email']); ?></td>
         </tr>
+
+        <tr>
+            <th>Average Rating</th>
+            <td><?php echo htmlspecialchars($user['average_rating']); ?></td>
+        </tr>
+
         <tr>
             <th>Sort Code</th>
             <td><?php echo htmlspecialchars($profile['sort_code']); ?></td>
@@ -110,7 +127,7 @@ $sold_items = $sold_result->fetch_all(MYSQLI_ASSOC);
 
 
 <div class="container mt-5">
-    <h2>My Purchases</h2>
+    <h2>User Purchases</h2>
     <?php if (!empty($purchases)): ?>
         <?php foreach ($purchases as $purchase): ?>
             <table class="table table-bordered table-striped">
@@ -138,7 +155,7 @@ $sold_items = $sold_result->fetch_all(MYSQLI_ASSOC);
 </div>
 
 <div class="container mt-5">
-    <h2>My Sold Items</h2>
+    <h2>User Sold Items</h2>
     <?php if (!empty($sold_items)): ?>
         <?php foreach ($sold_items as $sold): ?>
             <table class="table table-bordered table-striped">
@@ -165,6 +182,38 @@ $sold_items = $sold_result->fetch_all(MYSQLI_ASSOC);
     <?php endif; ?>
 </div>
 
+
+<div class="container mt-5">
+    <h2>User Reviews</h2>
+    <?php if (!empty($reviews)): ?>
+        <?php foreach ($reviews as $review): ?>
+            <table class="table table-bordered table-striped">
+                <tr>
+                    <th style="width: 30%;">Auction ID</th>
+                    <td><?php echo htmlspecialchars($review['auction_id']); ?></td>
+                </tr>
+                <tr>
+                    <th>Review Author</th>
+                    <td><?php echo htmlspecialchars($review['review_author']); ?></td>
+                </tr>
+                <tr>
+                    <th>Reviewed User</th>
+                    <td><?php echo htmlspecialchars($review['reviewed_user']); ?></td>
+                </tr>
+                <tr>
+                    <th>Review</th>
+                    <td><?php echo htmlspecialchars($review['review']); ?></td>
+                </tr>
+                <tr>
+                    <th>Rating</th>
+                    <td><?php echo htmlspecialchars($review['rating']); ?></td>
+                </tr>
+            </table>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <p>No reviews found.</p>
+    <?php endif; ?>
+</div>
 
 
 <!-- Include jQuery and Bootstrap JS -->
