@@ -38,14 +38,15 @@ CREATE TABLE IF NOT EXISTS `users` (
   PRIMARY KEY (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO users (username, email, password, average_rating, accountType)
-VALUES 
-('admin', 'admin@admin.com', 'admin1234', 0, 'admin'),
-('ola', 'ola@ola.com', 'user1234', 6, 'user'),
-('rachel', 'rachel@rachel.com', 'user1234', 9, 'user'),
-('jingyi', 'jingyi@jingyi.com', 'user1234', 7, 'user'),
-('user4', 'user4@user.com', 'user1234', 6, 'user'),
-('user5', 'user5@user.com', 'user1234', 4, 'user');
+INSERT INTO `users` (`username`, `email`, `password`, `average_rating`, `accountType`, `blocked`) VALUES
+('admin', 'admin@admin.com', '$2y$10$5bHV5CRcy3x0PgKIuKoaLuWMpl.wnZtesVzicINtB97pgy5oWFU22', 0, 'admin', 0),
+('jingyi', 'jingyi@jingyi.com', '$2y$10$QD07SEZLWOL9g86heIvpm..8PVVUH/D6VqEbTG3v2KD7YieMRcLs2', 5, 'user', 0),
+('ola', 'ola@ola.com', '$2y$10$MyZKXNUnNCpBxXZk592MR.1VOn89x/p/8p60bCFGg20OukERdrWXG', 3, 'user', 0),
+('rachel', 'rachel@rachel.com', '$2y$10$l3phFc70eX/R6wFeIFQyZeqc4tCmjxoZunCyxIVO/cfE4ltOKKSsS', 5, 'user', 0),
+('user4', 'user4@user.com', '$2y$10$LvCa3U34VB9jM6S5tI8tUub8NpsF1CIwS2D7DhyKf5erIFUkZ6f.q', 1, 'user', 1),
+('user5', 'user5@user.com', '$2y$10$fL41H6mZzqJjIQIIo9Utn.V3sMSmjw5KqHROvy.f5b0SRomp9x85a', 4, 'user', 0);
+
+-- Passwords are user1234 / admin1234
 
 -- --------------------------------------------------------
 
@@ -191,29 +192,27 @@ CREATE TABLE IF NOT EXISTS `auction` (
 
 -- Inserting dummy data into the auction table
 
-INSERT INTO `auction` (`item_name`, `item_description`, `category_id`, `username`, `starting_price`, `reserve_price`, `start_date`, `end_date`, `auction_status`, `image_path`, `material_id`, `item_condition`, `color_id`, `size_id`, `views`)
-VALUES
--- Active Listings
-('Cozy Wool Sweater', 'A warm and cozy hand-knitted sweater perfect for chilly days.', 5, 'ola', 60, 40, '2024-11-11', '2024-12-04', 'active', 'test.jpg', 2, 'new', 1, 3, 5),
-('Amigurumi Elephant', 'A cute and soft crochet elephant perfect for kids.', 12, 'rachel', 30, 20, '2024-11-12', '2024-12-05', 'active', 'test.jpg', 1, 'new', 3, 6, 3),
-('Crochet Blanket Pattern', 'DIY crochet pattern for a beautiful blanket. Instant digital download.', 13, 'jingyi', 10, 10, '2024-11-15', '2024-12-06', 'active', 'test.jpg', 2, 'new', 7, 6, 8),
-('Cozy Knit Blanket', 'A warm and comfortable hand-knitted blanket. Perfect for cold evenings and snuggling up.', 13, 'user4', 50, 30, '2024-11-10', '2024-12-07', 'active', 'test.jpg', 2, 'new', 7, 4, 15),
-('Colourful Crochet Shawl', 'A vibrant shawl featuring a beautiful crochet pattern. Lightweight and perfect for any occasion.', 2, 'user5', 40, 20, '2024-11-08', '2024-12-08', 'active', 'test.jpg', 1, 'new', 11, 3, 12),
-('Soft Wool Socks', 'Handmade wool socks that will keep your feet toasty during winter. Unisex, one size fits all.', 9, 'ola', 25, 10, '2024-11-09', '2024-12-09', 'active', 'test.jpg', 2, 'new', 1, 6, 8),
-('Baby Blue Cardigan', 'A charming knitted cardigan in baby blue, perfect for layering in the winter months.', 5, 'rachel', 45, 25, '2024-11-11', '2024-12-10', 'active', 'test.jpg', 4, 'new', 7, 2, 20),
-('Granny Square Throw', 'A stunning granny square throw blanket with mixed colours. Ideal as a gift or home decor.', 13, 'jingyi', 60, 40, '2024-11-07', '2024-12-11', 'active', 'test.jpg', 5, 'used', 11, 4, 10),
-('Handmade Crochet Toy Bear', 'Adorable crochet bear made from 100% cotton yarn. Safe for children and makes a perfect cuddly friend.', 12, 'user4', 35, 15, '2024-11-09', '2024-12-12', 'active', 'test.jpg', 1, 'new', 4, 3, 18),
-('Wool Mittens', 'Cozy wool mittens that are perfect for cold weather. Hand-knitted with love.', 8, 'user5', 120, 20, '2024-11-10', '2024-12-13', 'active', 'test.jpg', 2, 'new', 3, 1, 13),
-('Crochet Baby Blanket', 'Handmade baby blanket made from soft yarn, perfect as a baby shower gift.', 13, 'ola', 35, 25, '2024-11-13', '2024-12-14', 'active', 'test.jpg', 2, 'new', 8, 6, 9),
-('Knitted Wool Hat', 'A stylish knitted hat to keep you warm during winter.', 6, 'rachel', 25, 15, '2024-11-14', '2024-12-15', 'active', 'test.jpg', 2, 'new', 7, 3, 11),
-('Rainbow Crochet Blanket', 'Colourful crochet blanket, perfect for adding some brightness to your room.', 13, 'jingyi', 75, 50, '2024-11-12', '2024-12-16', 'active', 'test.jpg', 1, 'new', 11, 4, 18),
-('Handmade Cotton Headband', 'A soft and comfortable handmade headband, perfect for daily use.', 6, 'user4', 15, 8, '2024-11-15', '2024-12-17', 'active', 'test.jpg', 1, 'new', 2, 6, 7),
-('Knit Fingerless Gloves', 'Hand-knitted fingerless gloves, perfect for staying warm while using your phone.', 8, 'user5', 30, 18, '2024-11-14', '2024-12-18', 'active', 'test.jpg', 2, 'new', 5, 2, 14),
-
--- Closed listings
-('Vintage Wool Sweater', 'A vintage sweater made from wool. Slightly worn, but in good condition.', 5, 'ola', 45, 30, '2024-11-01', '2024-11-15', 'closed', 'test.jpg', 2, 'used', 1, 3, 25),
-('Crochet Pillow Set', 'A set of 2 handmade crochet pillows. Adds a cozy touch to your living room.', 14, 'rachel', 60, 40, '2024-11-02', '2024-11-16', 'closed', 'test.jpg', 1, 'new', 7, 4, 30),
-('Acrylic Yarn Bundle', 'A bundle of colourful acrylic yarns, perfect for multiple DIY projects.', 3, 'jingyi', 30, 20, '2024-11-03', '2024-11-17', 'closed', 'test.jpg', 4, 'new', 11, 6, 22);
+INSERT INTO `auction` (`auction_id`, `item_name`, `item_description`, `category_id`, `username`, `starting_price`, `reserve_price`, `start_date`, `end_date`, `auction_status`, `image_path`, `material_id`, `item_condition`, `color_id`, `size_id`, `views`) VALUES
+(20, 'Cozy Wool Sweater', 'A warm and cozy hand-knitted sweater perfect for chilly days.', 5, 'ola', 40, 0, '2024-11-27 11:09:13', '2024-12-10 11:00:00', 'active', './images/6746fdd929aca6.68593608.png', 2, 'new', NULL, 3, 1),
+(21, 'Plushie elephant', 'A cute and soft crochet elephant perfect for kids.', 12, 'ola', 30, 0, '2024-11-27 11:11:21', '2024-12-15 20:30:00', 'active', './images/6746fe5940a886.12215654.jpg', 3, 'new', 3, 6, 4),
+(22, 'Crochet Blanket Pattern', 'DIY crochet pattern for a beautiful blanket. Instant digital download.', 2, 'ola', 5, 0, '2024-11-27 11:13:05', '2024-12-02 12:00:00', 'active', './images/6746fec15f7fc3.33332364.png', 5, 'new', 11, 6, 0),
+(23, 'Cozy Blanket', 'A warm and comfortable hand-knitted blanket. Perfect for cold evenings and snuggling up.', 13, 'ola', 35, 40, '2024-11-27 11:15:16', '2024-11-28 11:15:00', 'active', './images/6746ff44dcd5d2.58085683.png', 5, 'new', 1, 6, 0),
+(24, 'Colourful Crochet Shawl', 'A vibrant shawl featuring a beautiful crochet pattern. Lightweight and perfect for any occasion.', 7, 'ola', 50, 0, '2024-11-27 11:17:10', '2024-11-29 13:00:00', 'active', './images/6746ffb6eee9c4.21453873.png', 1, 'new', 11, 6, 0),
+(25, 'Soft Wool Socks', 'Handmade wool socks that will keep your feet toasty during winter. Unisex, one size fits all.', 9, 'rachel', 15, 0, '2024-11-27 11:19:34', '2024-12-11 11:00:00', 'active', './images/674700462a2ea9.30274860.png', 2, 'new', 3, 6, 1),
+(26, 'Baby Blue Cardigan', 'A charming knitted cardigan in baby blue, perfect for layering in the winter months. Made by my mum!', 5, 'rachel', 45, 50, '2024-11-27 11:22:43', '2024-12-12 11:22:00', 'active', './images/6747010323e0f2.54712505.png', 4, 'new', 7, 3, 0),
+(27, 'Baby Clothes Knitting Patterns', 'Helping my mum sell her amazing patterns!!! Includes 20 patterns for jumpers, beanies, cardigans, mittens and more. You can still make some before Christmas!', 1, 'rachel', 7, 0, '2024-11-27 11:25:32', '2024-12-25 18:00:00', 'active', './images/674701aca29ba5.33749318.png', NULL, 'new', NULL, NULL, 2),
+(28, 'Baby Girl Dress', 'Made by my mum. Used to fit our 4 years old but she\'s growing fast so I need to sell to make others appreciate it!', 10, 'rachel', 15, 0, '2024-11-27 11:27:50', '2024-12-15 09:00:00', 'active', './images/674702365e8b15.65156781.png', 1, 'used', 11, NULL, 0),
+(29, 'Granny Square Throw', 'A stunning granny square throw blanket with mixed colours. Ideal as a gift or home decor.', 13, 'rachel', 25, 30, '2024-11-27 11:29:37', '2024-11-30 11:30:00', 'active', './images/674702a122e378.56338976.png', 3, 'new', 11, NULL, 0),
+(30, 'Handmade Crochet Toy Bear', 'Adorable crochet bear made from 100% cotton yarn. Safe for children and makes a perfect cuddly friend.', 12, 'rachel', 10, 30, '2024-11-27 11:31:14', '2025-02-20 21:00:00', 'active', './images/674703020b2682.14611284.png', 3, 'new', 4, NULL, 1),
+(31, 'Wool Mittens', 'Cozy wool mittens that are perfect for cold weather. Hand-knitted with love.', 8, 'rachel', 10, 25, '2024-11-27 11:33:21', '2024-11-28 11:00:00', 'active', './images/674703815ea4f6.79384279.png', 2, 'new', 3, 4, 2),
+(32, 'Crochet Baby Blanket', 'Handmade baby blanket made from soft yarn, perfect as a baby shower gift.', 13, 'jingyi', 15, 0, '2024-11-27 11:36:31', '2024-12-24 11:00:00', 'active', './images/6747043fc38a64.37972302.png', 5, 'new', 1, NULL, 0),
+(33, 'Knitted Wool Hat', 'A stylish knitted hat to keep you warm during winter.', 6, 'jingyi', 5, 0, '2024-11-27 11:38:21', '2024-12-07 14:00:00', 'active', './images/674704ad477aa4.54953914.png', 4, 'used', 2, 4, 3),
+(34, 'Rainbow Crochet Blanket', 'Colourful crochet blanket, perfect for adding some brightness to your room.', 13, 'jingyi', 20, 0, '2024-11-27 11:40:13', '2024-12-20 11:40:00', 'active', './images/6747051d2f8710.96673434.png', 5, 'new', 11, NULL, 0),
+(35, 'Handmade Cotton Headband', 'A soft and comfortable handmade headband, perfect for daily use.', 6, 'jingyi', 10, 0, '2024-11-27 11:42:10', '2024-12-20 18:00:00', 'active', './images/674705923563d0.24776727.png', 1, 'new', 11, 6, 2),
+(36, 'Knit Fingerless Gloves', 'Hand-knitted fingerless gloves, perfect for staying warm while using your phone.', 8, 'jingyi', 12, 0, '2024-11-27 11:43:48', '2025-02-20 23:55:00', 'active', './images/674705f4142fa3.39398712.png', 2, 'new', 10, 2, 4),
+(37, 'Vintage Wool Sweater', 'A vintage sweater made from wool. Slightly worn, but in good condition.', 5, 'jingyi', 20, 0, '2024-11-27 11:45:31', '2024-11-27 15:00:00', 'closed', './images/6747065bcf3b81.36176342.png', 2, 'used', 4, 3, 7),
+(38, 'Crochet Pillow Set', 'A set of 2 handmade crochet pillows. Adds a cozy touch to your living room.', 14, 'jingyi', 50, 0, '2024-11-27 11:46:57', '2024-11-27 12:00:00', 'closed', './images/674706b1da8d50.62375108.png', NULL, 'new', 7, NULL, 3),
+(39, 'Acrylic Yarn Bundle', 'A bundle of colourful acrylic yarns, perfect for multiple DIY projects.', 4, 'jingyi', 10, 0, '2024-11-27 11:48:19', '2024-11-28 09:00:00', 'active', './images/67470703c73225.52194658.png', 4, 'new', 11, NULL, 3);
 
 -- --------------------------------------------------------
 
@@ -234,6 +233,14 @@ CREATE TABLE IF NOT EXISTS `bids` (
       ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+INSERT INTO `bids` (`bid_id`, `auction_id`, `username`, `bid_amount`, `bid_time`) VALUES
+(2, 21, 'jingyi', 35, '2024-11-27 11:49:45'),
+(3, 37, 'ola', 25, '2024-11-27 11:51:17'),
+(4, 39, 'ola', 11, '2024-11-27 11:51:34'),
+(5, 37, 'rachel', 30, '2024-11-27 11:52:55'),
+(6, 36, 'rachel', 13, '2024-11-27 14:28:04'),
+(7, 31, 'jingyi', 11, '2024-11-27 14:31:21');
+
 -- --------------------------------------------------------
 
 --
@@ -252,25 +259,13 @@ CREATE TABLE IF NOT EXISTS `highest_bids` (
       ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+INSERT IGNORE INTO `highest_bids` (`auction_id`, `highest_bid`, `last_bidder`) VALUES
+(21, 35.00, 'jingyi'),
+(31, 11.00, 'jingyi'),
+(36, 13.00, 'rachel'),
+(37, 30.00, 'rachel'),
+(39, 11.00, 'ola');
 
--- --------------------------------------------------------
-
---
--- Table structure for table `closed_auctions`
---
-
-CREATE TABLE IF NOT EXISTS `closed_auctions` (
-  `win_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `auction_id` int(10) UNSIGNED NOT NULL,
-  `bid_id` int(10) UNSIGNED NOT NULL,
-  `seller_rating` int(10) UNSIGNED NOT NULL,
-  `buyer_rating` int(10) UNSIGNED NOT NULL,
-  PRIMARY KEY (`win_id`),
-  FOREIGN KEY (`auction_id`) REFERENCES `auction` (`auction_id`),
-  FOREIGN KEY (`bid_id`) REFERENCES `bids` (`bid_id`)
-      ON DELETE CASCADE 
-      ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -292,11 +287,9 @@ CREATE TABLE IF NOT EXISTS `sales` (
       ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO `sales` (`auction_id`,`seller_username`,`buyer_username`,`sale_price`)
-VALUES
-(16,'ola','rachel',40),
-(17,'rachel','jingyi',50),
-(18,'jingyi','ola',25);
+INSERT INTO `sales` (`sale_id`, `auction_id`, `seller_username`, `buyer_username`, `sale_price`) VALUES
+(4, 37, 'jingyi', 'rachel', 30);
+
 
 -- --------------------------------------------------------
 
@@ -315,6 +308,13 @@ CREATE TABLE IF NOT EXISTS `watchlist` (
       ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+INSERT INTO `watchlist` (`watch_id`, `username`, `auction_id`) VALUES
+(4, 'jingyi', 21),
+(3, 'jingyi', 36),
+(5, 'ola', 27),
+(7, 'rachel', 27),
+(6, 'rachel', 38);
+
 -- --------------------------------------------------------
 
 -- Table structure for table `user_views`
@@ -331,6 +331,28 @@ CREATE TABLE IF NOT EXISTS `user_views` (
       ON DELETE CASCADE 
       ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+INSERT INTO `user_views` (`view_id`, `username`, `auction_id`, `view_count`) VALUES
+(10, 'ola', 20, 1),
+(11, 'rachel', 25, 1),
+(12, 'rachel', 21, 1),
+(13, 'jingyi', 21, 3),
+(14, 'jingyi', 36, 2),
+(15, 'ola', 37, 2),
+(16, 'ola', 39, 2),
+(17, 'ola', 27, 1),
+(18, 'rachel', 37, 4),
+(19, 'rachel', 30, 1),
+(20, 'rachel', 38, 2),
+(21, 'rachel', 27, 1),
+(22, 'rachel', 36, 2),
+(23, 'jingyi', 35, 2),
+(24, 'jingyi', 38, 1),
+(25, 'jingyi', 37, 1),
+(26, 'jingyi', 39, 1),
+(27, 'jingyi', 31, 2),
+(28, 'user4', 33, 3);
 
 -- --------------------------------------------------------
 
@@ -366,6 +388,11 @@ CREATE TABLE IF NOT EXISTS `review` (
       ON DELETE CASCADE 
       ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO `review` (`review_id`, `auction_id`, `review_author`, `reviewed_user`, `review`, `rating`) VALUES
+(1, 37, 'rachel', 'jingyi', 'Very happy with my purchase!', 5);
+
+
 
 -- --------------------------------------------------------
 
@@ -414,6 +441,27 @@ CREATE TABLE IF NOT EXISTS notifications (
     ON DELETE CASCADE
     ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+INSERT INTO `notifications` (`notification_id`, `username`, `auction_id`, `message`, `type`, `is_read`, `created_at`) VALUES
+(5, 'jingyi', 21, 'You have placed a bid of £35.00 on auction ID: 21', 'bidding', 0, '2024-11-27 11:49:45'),
+(6, 'ola', 21, 'A new bid of £35.00 has been placed on your auction (ID: 21)', 'auction', 0, '2024-11-27 11:49:45'),
+(7, 'ola', 37, 'You have placed a bid of £25.00 on auction ID: 37', 'bidding', 0, '2024-11-27 11:51:17'),
+(8, 'jingyi', 37, 'A new bid of £25.00 has been placed on your auction (ID: 37)', 'auction', 0, '2024-11-27 11:51:17'),
+(9, 'ola', 39, 'You have placed a bid of £11.00 on auction ID: 39', 'bidding', 0, '2024-11-27 11:51:34'),
+(10, 'jingyi', 39, 'A new bid of £11.00 has been placed on your auction (ID: 39)', 'auction', 0, '2024-11-27 11:51:34'),
+(11, 'rachel', 37, 'You have placed a bid of £30.00 on auction ID: 37', 'bidding', 0, '2024-11-27 11:52:55'),
+(12, 'ola', 37, 'You have been outbid on auction ID: 37', 'bidding', 0, '2024-11-27 11:52:55'),
+(13, 'jingyi', 37, 'A new bid of £30.00 has been placed on your auction (ID: 37)', 'auction', 0, '2024-11-27 11:52:55'),
+(14, 'jingyi', 38, 'Your auction for Auction ID 38 ended without any bids being placed.', 'auction', 0, '2024-11-27 14:16:43'),
+(15, 'rachel', 36, 'You have placed a bid of £13.00 on auction ID: 36', 'bidding', 0, '2024-11-27 14:28:04'),
+(16, 'jingyi', 36, 'A new bid of £13.00 has been placed on an auction you are watching (ID: 36)', 'watchlist', 0, '2024-11-27 14:28:04'),
+(17, 'jingyi', 36, 'A new bid of £13.00 has been placed on your auction (ID: 36)', 'auction', 0, '2024-11-27 14:28:04'),
+(18, 'jingyi', 31, 'You have placed a bid of £11.00 on auction ID: 31', 'bidding', 0, '2024-11-27 14:31:21'),
+(19, 'rachel', 31, 'A new bid of £11.00 has been placed on your auction (ID: 31)', 'auction', 0, '2024-11-27 14:31:21'),
+(20, 'rachel', 37, 'Congratulations! You won the auction for Auction ID 37 with a bid of £30.00.', 'bidding', 0, '2024-11-27 15:00:51'),
+(21, 'jingyi', 37, 'Congratulations! Your auction for Auction ID 37 ended successfully with the highest bid of £30.00 to User: rachel.', 'auction', 0, '2024-11-27 15:00:51');
+
 
 
 -- Final configuration and cleanup
