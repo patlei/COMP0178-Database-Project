@@ -285,9 +285,9 @@ $stmt->close();
                 <?php endif; ?>
                 <div class="mt-3">
                     <p class="mt-2 mb-0">Seller's average rating: <?php echo $average_rating; ?></p>
-                    <a href="profile.php?seller_username=<?php echo urlencode($seller_username); ?>" 
-                       class="btn btn-primary btn-sm">
-                       View Seller Profile
+                    <a href="profile.php?user=<?php echo urlencode($seller_username); ?>" 
+                       class="btn btn-secondary">
+                       View Seller's Profile
                     </a>
                   </div>
             </div>
@@ -310,6 +310,11 @@ $stmt->close();
                       <!-- Auction ended with a sale -->
                       This auction ended <?php echo date_format($end_time, 'j M H:i'); ?><br>
                       Sold for £<?php echo number_format($current_price, 2); ?> to User: <?php echo($highest_bidder)?>
+
+                      <div style="margin-top: 10px;">
+                      <!-- View Buyer's Profile Button -->
+                        <a href="profile.php?user=<?php echo urlencode($highest_bidder); ?>" class="btn btn-secondary">View Buyer's Profile</a>
+                      </div>
                       <!--Display review form button for seller and buyer -->
                       <?php // Check if the user has already submitted a review for this auction
                       $query_review_check = "SELECT COUNT(*) FROM review WHERE auction_id = ? AND review_author = ?";

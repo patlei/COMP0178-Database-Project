@@ -11,7 +11,7 @@ if (!isset($_SESSION['username'])) {
 
 // Determine the username to display
 $logged_in_username = $_SESSION['username'];
-$view_username = isset($_GET['seller_username']) ? $_GET['seller_username'] : $logged_in_username;
+$view_username = isset($_GET['user']) ? $_GET['user'] : $logged_in_username;
 
 
 // Fetch user profile information
@@ -234,3 +234,5 @@ $reviews = $reviews_result->fetch_all(MYSQLI_ASSOC);
 <?php
 $conn->close(); // Close database connection
 ?>
+
+<?php include_once("footer.php")?>
