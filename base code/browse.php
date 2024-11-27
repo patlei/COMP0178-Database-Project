@@ -452,14 +452,16 @@ $max_page = ($results_per_page > 0) ? ceil($num_results / $results_per_page) : 1
             $recently_viewed_stmt->execute();
             $recently_viewed_result = $recently_viewed_stmt->get_result();
 
-            $image_path = isset($row['image_path']) ? htmlspecialchars($row['image_path']) : null;
             
-            // Check if image path is valid, else use placeholder image
-            $image_src = (!empty($image_path) && file_exists($image_path)) ? $image_path : './images/default-placeholder.png';
-            
-
             if ($recently_viewed_result && $recently_viewed_result->num_rows > 0) {
                 while ($rec_row = $recently_viewed_result->fetch_assoc()) {
+
+                    $image_path = isset($rec_row['image_path']) ? htmlspecialchars($rec_row['image_path']) : null;
+            
+                     // Check if image path is valid, else use placeholder image
+                    $image_src = (!empty($image_path) && file_exists($image_path)) ? $image_path : './images/default-placeholder.png';
+            
+
                     echo '<div class="col-3">
                             <div class="card h-100">
                                 <img src="' . $image_src . '" class="card-img-top" alt="' . htmlspecialchars($rec_row['item_name']) . '" style="object-fit: cover; height: 150px;">
@@ -516,7 +518,7 @@ $max_page = ($results_per_page > 0) ? ceil($num_results / $results_per_page) : 1
                     break;
                 }
                 
-                $image_path = isset($row['image_path']) ? htmlspecialchars($row['image_path']) : null;
+                $image_path = isset($pop_row['image_path']) ? htmlspecialchars($pop_row['image_path']) : null;
             
                 // Check if image path is valid, else use placeholder image
                 $image_src = (!empty($image_path) && file_exists($image_path)) ? $image_path : './images/default-placeholder.png';

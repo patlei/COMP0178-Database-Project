@@ -16,13 +16,31 @@ if (!isset($_SESSION['logged_in'])) {
     $_SESSION['account_type'] = 'guest';
 }
 
-// Secure session configuration (optional but recommended)
+// Secure session configuration 
 session_regenerate_id(true); // Regenerate session ID to prevent session fixation attacks
 
 // Display welcome message for logged-in users
 $greeting_message = "";
 if ($_SESSION['logged_in'] && isset($_SESSION['username'])) {
     $greeting_message = "Welcome back, " . htmlspecialchars($_SESSION['username']) . "!";
+}
+
+// Check if the logged-in user is blocked
+$blocked_message = "";
+if ($_SESSION['logged_in']) {
+    $blockedQuery = "SELECT blocked FROM users WHERE username = ?";
+    $blockedStmt = $conn->prepare($blockedQuery);
+    $blockedStmt->bind_param("s", $_SESSION['username']);
+    $blockedStmt->execute();
+    $blockedStmt->bind_result($blocked);
+    $blockedStmt->fetch();
+    $blockedStmt->close();
+
+    if ($blocked) {
+        $blocked_message = "<div class='alert alert-danger text-center mb-0' role='alert'>
+                                Your account is blocked. Some features may be restricted.
+                            </div>";
+    }
 }
 ?>
 
@@ -45,6 +63,9 @@ if ($_SESSION['logged_in'] && isset($_SESSION['username'])) {
 </head>
 
 <body>
+
+<!-- Blocked Message -->
+<?php echo $blocked_message; ?>
 
 <!-- Top Navbar -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light">

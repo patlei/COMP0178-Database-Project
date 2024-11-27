@@ -1,4 +1,5 @@
 <?php
+include_once("header.php");
 include_once("connection.php");
 // Set PHP's default timezone to UTC
 date_default_timezone_set('UTC');
@@ -12,6 +13,26 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 $username = $_SESSION['username'];
+
+// Check if the user is blocked
+$blockedQuery = "SELECT blocked FROM users WHERE username = ?";
+$blockedStmt = $conn->prepare($blockedQuery);
+$blockedStmt->bind_param("s", $username);
+$blockedStmt->execute();
+$blockedStmt->bind_result($blocked);
+$blockedStmt->fetch();
+$blockedStmt->close();
+
+if ($blocked) {
+    // If the user is blocked, show a message and exit
+    echo "<div class='container my-5'>
+            <div class='alert alert-danger' role='alert'>
+                You are blocked by an admin, you cannot bid on auctions.
+            </div>
+          </div>";
+    include_once("footer.php");
+    exit();
+}
 
 // Get POST data - auction_id and bid_amount
 $auction_id = isset($_POST['auction_id']) ? $_POST['auction_id'] : '';
