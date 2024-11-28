@@ -175,7 +175,7 @@ function update_watchlist_notifications($conn) {
 
           // Create a notification for the user
           $message = "Auction ID: " . $auction_id . " is ending soon. Place your bid before it's too late!";
-          $type = 'watchlist_ending';
+          $type = 'watchlist';
 
           $notification_query = "INSERT INTO notifications (username, auction_id, message, type, is_read)
                                  VALUES (?, ?, ?, ?, FALSE)";
