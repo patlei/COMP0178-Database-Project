@@ -226,7 +226,7 @@ if (!$result2) {
 
 <?php
 // Query to get the sellers average rating
-$query = "SELECT average_rating FROM users WHERE username = ?";
+$query = "SELECT ROUND(AVG(rating), 1) FROM review WHERE reviewed_user = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("s", $seller_username);
 $stmt->execute();
