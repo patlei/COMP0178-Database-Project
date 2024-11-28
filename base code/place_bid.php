@@ -4,8 +4,6 @@ include_once("connection.php");
 // Set PHP's default timezone to UTC
 date_default_timezone_set('UTC');
 
-session_start();
-
 // Retrieve username from session
 if (!isset($_SESSION['username'])) {
     // Redirect to login if not logged in
