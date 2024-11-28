@@ -1,14 +1,20 @@
 <?php
+// Start output buffering to prevent "headers already sent" errors
+ob_start(); 
+
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Include other necessary files
 include_once('connection.php');
 include_once('utilities.php');
 
-// Update auction status (this ensures any completed auctions are marked as closed)
+// Update auction status (ensures any completed auctions are marked as closed)
 update_auction_status($conn);
 
 // Update watchlist notifications for ending auctions
 update_watchlist_notifications($conn);
-
-session_start();
 
 // Default session variables if not logged in
 if (!isset($_SESSION['logged_in'])) {
