@@ -41,6 +41,29 @@ $ending_soon_result = $conn->query($ending_soon_sql);
     </div>
 </div>
 
+<!-- Categories Section -->
+<div class="container mt-5">
+    <h3>Shop by Categories</h3>
+    <div class="row mt-4">
+        <?php
+        $cat_sql = "SELECT category_id, category_name, category_section FROM categories LIMIT 6";
+        $cat_result = $conn->query($cat_sql);
+        if ($cat_result && $cat_result->num_rows > 0) {
+            while ($cat_row = $cat_result->fetch_assoc()) {
+                echo '<div class="col-md-4 mb-4">
+                        <div class="card h-100 text-center">
+                            <div class="card-body">
+                                <h5 class="card-title">' . htmlspecialchars($cat_row['category_name']) . '</h5>
+                                <p class="card-text">Explore our range of ' . htmlspecialchars($cat_row['category_name']) . ' in ' . htmlspecialchars($cat_row['category_section']) . '.</p>
+                                <a href="browse.php?cat=' . htmlspecialchars($cat_row['category_id']) . '" class="btn btn-primary">View Category</a>
+                            </div>
+                        </div>
+                      </div>';
+            }
+        }
+        ?>
+    </div>
+</div>
 
 <!-- Popular Listings Section -->
 <div class="container mt-5 popular-listings">
@@ -72,30 +95,6 @@ $ending_soon_result = $conn->query($ending_soon_sql);
             }
         } else {
             echo '<p class="col-12 text-center text-muted">No popular listings available at this time.</p>';
-        }
-        ?>
-    </div>
-</div>
-
-<!-- Categories Section -->
-<div class="container mt-5">
-    <h3>Shop by Categories</h3>
-    <div class="row mt-4">
-        <?php
-        $cat_sql = "SELECT category_id, category_name, category_section FROM categories LIMIT 6";
-        $cat_result = $conn->query($cat_sql);
-        if ($cat_result && $cat_result->num_rows > 0) {
-            while ($cat_row = $cat_result->fetch_assoc()) {
-                echo '<div class="col-md-4 mb-4">
-                        <div class="card h-100 text-center">
-                            <div class="card-body">
-                                <h5 class="card-title">' . htmlspecialchars($cat_row['category_name']) . '</h5>
-                                <p class="card-text">Explore our range of ' . htmlspecialchars($cat_row['category_name']) . ' in ' . htmlspecialchars($cat_row['category_section']) . '.</p>
-                                <a href="browse.php?cat=' . htmlspecialchars($cat_row['category_id']) . '" class="btn btn-primary">View Category</a>
-                            </div>
-                        </div>
-                      </div>';
-            }
         }
         ?>
     </div>
