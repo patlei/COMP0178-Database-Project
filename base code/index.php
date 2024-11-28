@@ -16,18 +16,23 @@ include_once("connection.php");
 require_once("utilities.php");
 
 // Fetch "Popular Listings" based on the highest number of views.
-$popular_sql = "SELECT auction_id, item_name, image_path, starting_price, views 
-                FROM auction 
-                WHERE auction_status = 'active'
-                ORDER BY views DESC 
+$popular_sql = "SELECT a.auction_id, a.item_name, a.image_path, 
+                       COALESCE(h.highest_bid, a.starting_price) AS display_price, 
+                       a.views 
+                FROM auction a
+                LEFT JOIN highest_bids h ON a.auction_id = h.auction_id
+                WHERE a.auction_status = 'active'
+                ORDER BY a.views DESC 
                 LIMIT 5";
 $popular_result = $conn->query($popular_sql);
 
 // Fetch "Ending Soon Auctions" from auction table
-$ending_soon_sql = "SELECT auction_id, item_name, starting_price, image_path, end_date 
-                    FROM auction 
-                    WHERE auction_status = 'active' 
-                    ORDER BY end_date ASC 
+$ending_soon_sql = "SELECT a.auction_id, a.item_name, a.image_path, a.end_date, 
+                           COALESCE(h.highest_bid, a.starting_price) AS display_price 
+                    FROM auction a
+                    LEFT JOIN highest_bids h ON a.auction_id = h.auction_id
+                    WHERE a.auction_status = 'active'
+                    ORDER BY a.end_date ASC 
                     LIMIT 5";
 $ending_soon_result = $conn->query($ending_soon_sql);
 ?>
@@ -84,7 +89,7 @@ $ending_soon_result = $conn->query($ending_soon_sql);
                             <img src="' . $image_src . '" class="card-img-top" alt="' . htmlspecialchars($row['item_name']) . '">
                             <div class="card-body">
                                 <h5 class="card-title">' . htmlspecialchars($row['item_name']) . '</h5>
-                                <p class="card-text"><strong>Starting Price: £' . number_format($row['starting_price'], 2) . '</strong></p>
+                                <p class="card-text"><strong>Current Price: £' . number_format($row['display_price'], 2) . '</strong></p>
                                 <p class="text-muted">Views: ' . number_format($row['views']) . '</p>
                             </div>
                             <div class="card-footer text-center">
@@ -119,7 +124,7 @@ $ending_soon_result = $conn->query($ending_soon_sql);
                             <img src="' . $image_src . '" class="card-img-top" alt="' . htmlspecialchars($row['item_name']) . '">
                             <div class="card-body">
                                 <h5 class="card-title">' . htmlspecialchars($row['item_name']) . '</h5>
-                                <p class="card-text"><strong>Starting Price: £' . number_format($row['starting_price'], 2) . '</strong></p>
+                                <p class="card-text"><strong>Current Price: £' . number_format($row['display_price'], 2) . '</strong></p>
                                 <p class="text-muted">Ends on: ' . $end_date->format('d M Y H:i') . '</p>
                             </div>
                             <div class="card-footer text-center">
