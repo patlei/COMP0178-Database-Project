@@ -132,15 +132,13 @@ $seller_username = $auction['username'];
 $stmt->close();
 
 // Query to get the highest bid and the username of the highest bidder
-$query = "SELECT bid_amount, username FROM bids WHERE auction_id = ? ORDER BY bid_amount DESC LIMIT 1";
+$query = "SELECT highest_bid, last_bidder FROM highest_bids WHERE auction_id = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $auction_id);
 $stmt->execute();
 $stmt->bind_result($current_price, $highest_bidder);
 $stmt->fetch();
 $stmt->close();
-
-
 
 // If there are no bids, set the current price as the starting price
 if ($current_price === null) {
@@ -226,7 +224,7 @@ if (!$result2) {
 
 <?php
 // Query to get the sellers average rating
-$query = "SELECT ROUND(AVG(rating), 1) FROM review WHERE reviewed_user = ?";
+$query = "SELECT average_rating FROM users WHERE username = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("s", $seller_username);
 $stmt->execute();
