@@ -150,17 +150,15 @@ function update_auction_status($conn) {
 
 // Function to update watchlist notifications
 function update_watchlist_notifications($conn) {
-  // Set the timezone
-  date_default_timezone_set('UTC');
-  // Get the current time
+  date_default_timezone_set('UTC'); // Set timezone
   $current_time = date('Y-m-d H:i:s');
 
-  // Notify users of auctions in their watchlist that are ending soon
-  // Example: Notify if an auction is ending in the next hour
+  // Query to fetch auctions ending soon and users watching them
   $end_soon_query = "SELECT a.auction_id, a.end_date, w.username
                      FROM auction a
                      JOIN watchlist w ON a.auction_id = w.auction_id
-                     WHERE a.end_date > ? AND a.end_date <= DATE_ADD(?, INTERVAL 1 HOUR)
+                     WHERE a.end_date > ? 
+                     AND a.end_date <= DATE_ADD(?, INTERVAL 1 HOUR)
                      AND a.auction_status = 'active'";
 
   $stmt = $conn->prepare($end_soon_query);
@@ -173,21 +171,42 @@ function update_watchlist_notifications($conn) {
           $auction_id = $row['auction_id'];
           $username = $row['username'];
 
-          // Create a notification for the user
-          $message = "Auction ID: " . $auction_id . " is ending soon. Place your bid before it's too late!";
-          $type = 'watchlist';
+          // Check if a similar notification has already been sent
+          $check_notification_query = "SELECT COUNT(*) 
+                                       FROM notifications 
+                                       WHERE username = ? 
+                                       AND auction_id = ? 
+                                       AND type = 'watchlist' 
+                                       AND message LIKE 'Auction ID: % is ending soon%'
+                                       AND created_at > DATE_SUB(?, INTERVAL 1 HOUR)";
+          $check_stmt = $conn->prepare($check_notification_query);
+          if ($check_stmt) {
+              $check_stmt->bind_param("sis", $username, $auction_id, $current_time);
+              $check_stmt->execute();
+              $check_stmt->bind_result($notification_exists);
+              $check_stmt->fetch();
+              $check_stmt->close();
 
-          $notification_query = "INSERT INTO notifications (username, auction_id, message, type, is_read)
-                                 VALUES (?, ?, ?, ?, FALSE)";
-          $notification_stmt = $conn->prepare($notification_query);
-          if ($notification_stmt) {
-              $notification_stmt->bind_param("siss", $username, $auction_id, $message, $type);
-              $notification_stmt->execute();
-              $notification_stmt->close();
+              // If no notification exists, send a new one
+              if ($notification_exists == 0) {
+                  $message = "Auction ID: $auction_id is ending soon. Place your bid before it's too late!";
+                  $type = 'watchlist';
+
+                  $notification_query = "INSERT INTO notifications (username, auction_id, message, type, is_read)
+                                         VALUES (?, ?, ?, ?, FALSE)";
+                  $notification_stmt = $conn->prepare($notification_query);
+                  if ($notification_stmt) {
+                      $notification_stmt->bind_param("siss", $username, $auction_id, $message, $type);
+                      $notification_stmt->execute();
+                      $notification_stmt->close();
+                  } else {
+                      error_log("Failed to prepare notification insert statement: " . $conn->error);
+                  }
+              }
+          } else {
+              error_log("Failed to prepare notification check statement: " . $conn->error);
           }
       }
-
-      // Close the statement
       $stmt->close();
   } else {
       error_log("Failed to prepare the watchlist notification query: " . $conn->error);
